@@ -16,8 +16,14 @@ const {
   LESS,
   GREATER_EQUAL,
   GREATER,
+  SLASH,
+  STRING,
+  NUMBER,
+  OR,
+  IDENTIFIER,
 } = require('./TokenType');
 const Token = require('./Token');
+const Lox = require('./lox');
 
 class Scanner {
   constructor(source) {
@@ -34,6 +40,14 @@ class Scanner {
     this.addToken = this.addToken.bind(this);
     this._addToken = this._addToken.bind(this);
     this.match = this.match.bind(this);
+    this.peek = this.peek.bind(this);
+    this.string = this.string.bind(this);
+    this.isDigit = this.isDigit.bind(this);
+    this.number = this.number.bind(this);
+    this.peekNext = this.peekNext.bind(this);
+    this.identifier = this.identifier.bind(this);
+    this.isAlpha = this.isAlpha.bind(this);
+    this.isAlphaNumeric = this.isAlphaNumeric.bind(this);
   }
 
   scanTokens() {
@@ -74,8 +88,34 @@ class Scanner {
       case '>':
         this.addToken(this.match('=') ? GREATER_EQUAL : GREATER);
         break;
+      case '/':
+        if (this.match('/')) {
+          while (this.peek() !== '\n' && !this.isAtEnd()) this.advance();
+        } else {
+          this.addToken(SLASH);
+        }
+        break;
+      case ' ':
+      case '\r':
+      case '\t':
+        break;
+      case '\n':
+        this.line++;
+        break;
+      case '"': this.string(); break;
+      case 'o':
+        if (this.match('r')) {
+          this.addToken(OR);
+        }
+        break;
       default:
-        throw new Error(this.line, 'Unexpected character.');
+        if (this.isDigit(c)) {
+          this.number();
+        } else if (this.isAlpha(c)) {
+          this.identifier();
+        } else {
+          Lox.error(this.line, 'Unexpected character.');
+        }
         break;
     }
   }
@@ -99,6 +139,67 @@ class Scanner {
 
     this.current++;
     return true;
+  }
+
+  peek() {
+    if (this.isAtEnd()) return '\0';
+    return this.source.charCodeAt(this.current);
+  }
+
+  string() {
+    while (this.peek() !== '"' && !this.isAtEnd()) {
+      if (this.peek() === '\n') this.line++;
+      this.advance();
+    }
+
+    if (this.isAtEnd()) {
+      Lox.error(this.line, 'Unterminated string.');
+      return;
+    }
+
+    this.advance();
+
+    const value = this.source.substring(this.start + 1, this.current - 1);
+    this.addToken(STRING, value);
+  }
+
+  isDigit(c) {
+    c = parseInt(c, 10);
+    return c >= 0 && c <= 9;
+  }
+
+  number() {
+    while (this.isDigit(this.peek())) this.advance();
+
+    if (this.peek() === '.' && this.isDigit(this.peekNext())) {
+      this.advance();
+
+      while (this.isDigit(this.peek())) this.advance();
+    }
+
+    this.addToken(NUMBER,
+      parseFloat(this.source.substring(this.start, this.current)));
+  }
+
+  peekNext() {
+    if (this.current + 1 >= this.source.length) return '\0';
+    return this.source.charCodeAt(this.current + 1);
+  }
+
+  identifier() {
+    while (this.isAlphaNumeric(this.peek())) this.advance();
+
+    this.addToken(IDENTIFIER);
+  }
+
+  isAlpha(c) {
+    return (c.charCodeAt(0) >= 'a'.charCodeAt(0) && c.charCodeAt(0) <= 'z'.charCodeAt(0)) ||
+           (c.charCodeAt(0) >= 'A'.charCodeAt(0) && c.charCodeAt(0) <= 'Z'.charCodeAt(0)) ||
+           c === '_';
+  }
+
+  isAlphaNumeric(c) {
+    return this.isAlpha(c) || this.isDigit(c);
   }
 }
 module.exports = Scanner;

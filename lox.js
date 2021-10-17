@@ -1,23 +1,11 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
-const { report } = require('process');
 const readline = require('readline');
 
 const args = process.argv.slice(2);
 
 let hadError = false;
-
-(async function () {
-    if (args.length > 1) {
-        console.log('Usage: nlox [script]');
-        process.exit(64);
-    } else if (args.length === 1) {
-        runFile(args[0]);
-    } else {
-        await runPrompt();
-    }
-}());
 
 function runFile(filePath) {
     const data = fs.readFileSync(path.join(process.cwd(), filePath), 'utf-8');
@@ -39,7 +27,7 @@ async function runPrompt() {
             });
         });
     };
-    
+
     for (;;) {
         const line = await question('> ');
         if (line === null) break;
@@ -57,11 +45,25 @@ function run(source) {
     }
 }
 
-function error(line, message) {
-    report(line, '', message);
-}
-
 function report(line, where, message) {
     console.error(`[line ${line}] Error ${where}: ${message}`);
     hadError = true;
+}
+
+function error(line, message) {
+    report(line, '', message);
+}
+exports.error = error;
+
+if (!module.parent) {
+  (async function () {
+    if (args.length > 1) {
+      console.log('Usage: nlox [script]');
+      process.exit(64);
+    } else if (args.length === 1) {
+      runFile(args[0]);
+    } else {
+      await runPrompt();
+    }
+  }());
 }
