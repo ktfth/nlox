@@ -47,4 +47,4 @@ const TokenType = {
 
   EOF: 38
 };
-exports.TokenType = TokenType;
+module.exports = TokenType;
