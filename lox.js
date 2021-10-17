@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
+const Scanner = require('./Scanner');
 
 const args = process.argv.slice(2);
 
@@ -41,7 +42,7 @@ function run(source) {
     const tokens = scanner.scanTokens();
 
     for (let token of tokens) {
-        console.log(token);
+      console.log(token);
     }
 }
 

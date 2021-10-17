@@ -21,9 +21,43 @@ const {
   NUMBER,
   OR,
   IDENTIFIER,
+  AND,
+  CLASS,
+  ELSE,
+  FALSE,
+  FOR,
+  FUN,
+  IF,
+  NIL,
+  PRINT,
+  RETURN,
+  SUPER,
+  THIS,
+  TRUE,
+  VAR,
+  WHILE,
 } = require('./TokenType');
 const Token = require('./Token');
 const Lox = require('./lox');
+
+const keywords = {
+  'and': AND,
+  'class': CLASS,
+  'else': ELSE,
+  'false': FALSE,
+  'for': FOR,
+  'fun': FUN,
+  'if': IF,
+  'nil': NIL,
+  'or': OR,
+  'print': PRINT,
+  'return': RETURN,
+  'super': SUPER,
+  'this': THIS,
+  'true': TRUE,
+  'var': VAR,
+  'while': WHILE,
+};
 
 class Scanner {
   constructor(source) {
@@ -56,7 +90,9 @@ class Scanner {
       this.scanToken();
     }
 
-    this.tokens.push(new Token(EOF, "", null, this.line))
+    this.tokens.push(new Token(EOF, "", null, this.line));
+
+    return this.tokens;
   }
 
   isAtEnd() {
@@ -66,44 +102,44 @@ class Scanner {
   scanToken() {
     const c = this.advance();
     switch (c) {
-      case '(': this.addToken(LEFT_PAREN); break;
-      case ')': this.addToken(RIGHT_PAREN); break;
-      case '{': this.addToken(LEFT_BRACE); break;
-      case '}': this.addToken(RIGHT_BRACE); break;
-      case ',': this.addToken(COMMA); break;
-      case '.': this.addToken(DOT); break;
-      case '-': this.addToken(MINUS); break;
-      case '+': this.addToken(PLUS); break;
-      case ';': this.addToken(SEMICOLON); break;
-      case '*': this.addToken(STAR); break;
-      case '!':
+      case '('.charCodeAt(0): this.addToken(LEFT_PAREN); break;
+      case ')'.charCodeAt(0): this.addToken(RIGHT_PAREN); break;
+      case '{'.charCodeAt(0): this.addToken(LEFT_BRACE); break;
+      case '}'.charCodeAt(0): this.addToken(RIGHT_BRACE); break;
+      case ','.charCodeAt(0): this.addToken(COMMA); break;
+      case '.'.charCodeAt(0): this.addToken(DOT); break;
+      case '-'.charCodeAt(0): this.addToken(MINUS); break;
+      case '+'.charCodeAt(0): this.addToken(PLUS); break;
+      case ';'.charCodeAt(0): this.addToken(SEMICOLON); break;
+      case '*'.charCodeAt(0): this.addToken(STAR); break;
+      case '!'.charCodeAt(0):
         this.addToken(this.match('=') ? BANG_EQUAL : BANG);
         break;
-      case '=':
+      case '='.charCodeAt(0):
         this.addToken(this.match('=') ? EQUAL_EQUAL : EQUAL);
         break;
-      case '<':
+      case '<'.charCodeAt(0):
         this.addToken(this.match('=') ? LESS_EQUAL : LESS);
         break;
-      case '>':
+      case '>'.charCodeAt(0):
         this.addToken(this.match('=') ? GREATER_EQUAL : GREATER);
         break;
-      case '/':
+      case '/'.charCodeAt(0):
         if (this.match('/')) {
           while (this.peek() !== '\n' && !this.isAtEnd()) this.advance();
         } else {
           this.addToken(SLASH);
         }
         break;
-      case ' ':
-      case '\r':
-      case '\t':
+      case ' '.charCodeAt(0):
+      case '\r'.charCodeAt(0):
+      case '\t'.charCodeAt(0):
         break;
       case '\n':
         this.line++;
         break;
-      case '"': this.string(); break;
-      case 'o':
+      case '"'.charCodeAt(0): this.string(); break;
+      case 'o'.charCodeAt(0):
         if (this.match('r')) {
           this.addToken(OR);
         }
@@ -164,8 +200,7 @@ class Scanner {
   }
 
   isDigit(c) {
-    c = parseInt(c, 10);
-    return c >= 0 && c <= 9;
+    return c >= '0'.charCodeAt(0) && c <= '9'.charCodeAt(0);
   }
 
   number() {
@@ -189,13 +224,16 @@ class Scanner {
   identifier() {
     while (this.isAlphaNumeric(this.peek())) this.advance();
 
-    this.addToken(IDENTIFIER);
+    const text = this.source.substring(this.start, this.current);
+    const type = keywords[text];
+    if (type === null) type = IDENTIFIER;
+    this.addToken(type);
   }
 
   isAlpha(c) {
-    return (c.charCodeAt(0) >= 'a'.charCodeAt(0) && c.charCodeAt(0) <= 'z'.charCodeAt(0)) ||
-           (c.charCodeAt(0) >= 'A'.charCodeAt(0) && c.charCodeAt(0) <= 'Z'.charCodeAt(0)) ||
-           c === '_';
+    return (c >= 'a'.charCodeAt(0) && c <= 'z'.charCodeAt(0)) ||
+           (c >= 'A'.charCodeAt(0) && c <= 'Z'.charCodeAt(0)) ||
+           c === '_'.charCodeAt(0);
   }
 
   isAlphaNumeric(c) {
