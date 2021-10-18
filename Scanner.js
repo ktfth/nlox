@@ -166,7 +166,7 @@ class Scanner {
 
   _addToken(type, literal) {
     const text = this.source.substring(this.start, this.current);
-    this.tokens.push(type, text, literal, this.line);
+    this.tokens.push(new Token(type, text, literal, this.line));
   }
 
   match(expected) {

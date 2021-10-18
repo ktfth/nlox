@@ -42,7 +42,9 @@ function run(source) {
     const tokens = scanner.scanTokens();
 
     for (let token of tokens) {
-      console.log(token);
+      if (token !== null) {
+        console.log(token.toString());
+      }
     }
 }
 
