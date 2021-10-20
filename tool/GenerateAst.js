@@ -19,6 +19,8 @@ function defineAst(outputDir, baseName, types) {
   const filePath = path.join(outputDir, `${baseName}.js`);
   fs.appendFileSync(filePath, `class ${baseName} {\n`);
 
+  defineVisitor(filePath, baseName, types);
+
   fs.appendFileSync(filePath, '}\n');
 
   for (let type of types) {
@@ -41,6 +43,16 @@ function defineType(filePath, baseName, className, fieldList) {
   }
 
   fs.appendFileSync(filePath, `  }\n`);
+
+  fs.appendFileSync(filePath, '\n');
+  fs.appendFileSync(filePath, '  accept(visitor) {\n');
+  fs.appendFileSync(filePath, `    return visitor.visit${className}${baseName}(this);\n`);
+  fs.appendFileSync(filePath, '  }\n');
+
   fs.appendFileSync(filePath, '\n');
   fs.appendFileSync(filePath, '}\n');
+}
+
+function defineVisitor(filePath, baseName, types) {
+  // has no need to implement an interface in javascript
 }
