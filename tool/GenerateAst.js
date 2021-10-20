@@ -22,6 +22,7 @@ function defineAst(outputDir, baseName, types) {
   defineVisitor(filePath, baseName, types);
 
   fs.appendFileSync(filePath, '}\n');
+  fs.appendFileSync(filePath, `exports.${baseName} = ${baseName};\n`);
 
   for (let type of types) {
     const className = type.split(':')[0].trim();
@@ -35,6 +36,7 @@ function defineType(filePath, baseName, className, fieldList) {
   fs.appendFileSync(filePath, `class ${className} extends ${baseName} {\n`);
   const fieldListConstructor = fieldList.split(', ').map(field => field.split(' ')[1]).join(', ');
   fs.appendFileSync(filePath, `  constructor(${fieldListConstructor}) {\n`);
+  fs.appendFileSync(filePath, `    super(${fieldListConstructor});\n`);
 
   const fields = fieldList.split(', ');
   for (let field of fields) {
@@ -51,6 +53,7 @@ function defineType(filePath, baseName, className, fieldList) {
 
   fs.appendFileSync(filePath, '\n');
   fs.appendFileSync(filePath, '}\n');
+  fs.appendFileSync(filePath, `exports.${className} = ${className};\n`);
 }
 
 function defineVisitor(filePath, baseName, types) {
