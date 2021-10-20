@@ -160,8 +160,8 @@ class Scanner {
     return this.source.charCodeAt(this.current++);
   }
 
-  addToken(type) {
-    this._addToken(type, null);
+  addToken(type, literal) {
+    this._addToken(type, (literal || null));
   }
 
   _addToken(type, literal) {
@@ -213,7 +213,7 @@ class Scanner {
     }
 
     this.addToken(NUMBER,
-      parseFloat(this.source.substring(this.start, this.current)));
+      parseFloat(this.source.substring(this.start, this.current)), 10);
   }
 
   peekNext() {

@@ -3,6 +3,9 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 const Scanner = require('./Scanner');
+const Parser = require('./Parser');
+const AstPrinter = require('./AstPrinter');
+const TokenType = require('./TokenType');
 
 const args = process.argv.slice(2);
 
@@ -40,12 +43,12 @@ async function runPrompt() {
 function run(source) {
     const scanner = new Scanner(source);
     const tokens = scanner.scanTokens();
+    const parser = new Parser(tokens);
+    const expression = parser.parse();
 
-    for (let token of tokens) {
-      if (token !== null) {
-        console.log(token.toString());
-      }
-    }
+    if (hadError) return;
+
+    console.log(new AstPrinter().print(expression));
 }
 
 function report(line, where, message) {
@@ -53,8 +56,12 @@ function report(line, where, message) {
     hadError = true;
 }
 
-function error(line, message) {
-    report(line, '', message);
+function error(token, message) {
+  if (token.type === TokenType.EOF) {
+    report(token.line, ' at end', message);
+  } else {
+    report(token.line, ` at \'${token.lexeme}\'`, message);
+  }
 }
 exports.error = error;
 

@@ -45,14 +45,15 @@ class AstPrinter extends Expr {
     return builder.join('');
   }
 }
+module.exports = AstPrinter;
 
-const expression = new Binary(
-  new Unary(
-    new Token(TokenType.MINUS, '-', null, 1),
-    new Literal(123)
-  ),
-  new Token(TokenType.STAR, '*', null, 1),
-  new Grouping(new Literal(45.67))
-);
-
-console.log(new AstPrinter().print(expression));
+// const expression = new Binary(
+//   new Unary(
+//     new Token(TokenType.MINUS, '-', null, 1),
+//     new Literal(123)
+//   ),
+//   new Token(TokenType.STAR, '*', null, 1),
+//   new Grouping(new Literal(45.67))
+// );
+//
+// console.log(new AstPrinter().print(expression));
