@@ -6,54 +6,58 @@ const Scanner = require('./Scanner');
 const Parser = require('./Parser');
 const AstPrinter = require('./AstPrinter');
 const TokenType = require('./TokenType');
+const Interpreter = require('./Interpreter');
 
 const args = process.argv.slice(2);
 
+const interpreter = new Interpreter();
 let hadError = false;
+let hadRuntimeError = false;
 
 function runFile(filePath) {
-    const data = fs.readFileSync(path.join(process.cwd(), filePath), 'utf-8');
-    run(data);
-    if (hadError) process.exit(65);
+  const data = fs.readFileSync(path.join(process.cwd(), filePath), 'utf-8');
+  run(data);
+  if (hadError) process.exit(65);
+  if (hadRuntimeError) process.exit(70);
 }
 
 async function runPrompt() {
-    const question = (prompt) => {
-        return new Promise((resolve) => {
-            const rl = readline.createInterface({
-                input: process.stdin,
-                output: process.stdout,
-            });
+  const question = (prompt) => {
+    return new Promise((resolve) => {
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+      });
 
-            rl.question(prompt, (line) => {
-                rl.close();
-                resolve(line);
-            });
-        });
-    };
+      rl.question(prompt, (line) => {
+        rl.close();
+        resolve(line);
+      });
+    });
+  };
 
-    for (;;) {
-        const line = await question('> ');
-        if (line === null) break;
-        run(line);
-        hadError = false;
-    }
+  for (;;) {
+    const line = await question('> ');
+    if (line === null) break;
+    run(line);
+    hadError = false;
+  }
 }
 
 function run(source) {
-    const scanner = new Scanner(source);
-    const tokens = scanner.scanTokens();
-    const parser = new Parser(tokens);
-    const expression = parser.parse();
+  const scanner = new Scanner(source);
+  const tokens = scanner.scanTokens();
+  const parser = new Parser(tokens);
+  const expression = parser.parse();
 
-    if (hadError) return;
+  if (hadError) return;
 
-    console.log(new AstPrinter().print(expression));
+  interpreter.interpret(expression);
 }
 
 function report(line, where, message) {
-    console.error(`[line ${line}] Error ${where}: ${message}`);
-    hadError = true;
+  console.error(`[line ${line}] Error ${where}: ${message}`);
+  hadError = true;
 }
 
 function error(token, message) {
@@ -64,6 +68,13 @@ function error(token, message) {
   }
 }
 exports.error = error;
+
+function runtimeError(error) {
+  console.log(error);
+  console.log(`${error.message}\n[line ${error.token.line}]`);
+  hadRuntimeError = true;
+}
+exports.runtimeError = runtimeError;
 
 if (!module.parent) {
   (async function () {

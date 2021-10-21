@@ -1,4 +1,6 @@
+const Lox = require('./lox');
 const TokenType = require('./TokenType');
+const RuntimeError = require('./RuntimeError');
 
 Object
   .keys(TokenType)
@@ -13,6 +15,19 @@ class Interpreter {
     this.isTruthy = this.isTruthy.bind(this);
     this.visitBinaryExpr = this.visitBinaryExpr.bind(this);
     this.isEqual = this.isEqual.bind(this);
+    this.checkNumberOperand = this.checkNumberOperand.bind(this);
+    this.checkNumberOperands = this.checkNumberOperands.bind(this);
+    this.interpret = this.interpret.bind(this);
+    this.stringify = this.stringify.bind(this);
+  }
+
+  interpret(expression) {
+    try {
+      const value = this.evaluate(expression);
+      console.log(this.stringify(value));
+    } catch (error) {
+      Lox.runtimeError(error);
+    }
   }
 
   visitLiteralExpr(expr) {
@@ -26,10 +41,21 @@ class Interpreter {
       case BANG:
         return !isTruthy(right);
       case MINUS:
+        this.checkNumberOperand(expr.operator, right);
         return -right;
     }
 
     return null;
+  }
+
+  checkNumberOperand(operator, operand) {
+    if (operand instanceof Number) return;
+    throw new RuntimeError(operator, "Operand must be a number.");
+  }
+
+  checkNumberOperands(operator, left, right) {
+    if (left instanceof Number && right instanceof Number) return;
+    throw new RuntimeError(operator, 'Operands must be numbers.');
   }
 
   isTruthy(object) {
@@ -45,12 +71,30 @@ class Interpreter {
     return a === b;
   }
 
+  stringify(object) {
+    if (object === null) return 'nil';
+
+    if (object instanceof Number) {
+      let text = object.toString();
+      if (text.endsWith('.0')) {
+        text = text.substring(0, text.length - 2);
+      }
+      return text;
+    }
+
+    if (object instanceof Object) {
+      return JSON.stringify(object);
+    }
+
+    return object.toString();
+  }
+
   visitGroupingExpr(expr) {
     return this.evaluate(expr.expression);
   }
 
   evaluate(expr) {
-    return expr.accep(this);
+    return expr.accept(this);
   }
 
   visitBinaryExpr(expr) {
@@ -63,17 +107,23 @@ class Interpreter {
       case EQUAL_EQUAL:
         return this.isEqual(left, right);
       case GREATER:
+        this.checkNumberOperands(expr.operator, left, right);
         return left > right;
       case GREATER_EQUAL:
+        this.checkNumberOperands(expr.operator, left, right);
         return left >= right;
       case LESS:
+        this.checkNumberOperands(expr.operator, left, right);
         return left < right;
       case LESS_EQUAL:
+        this.checkNumberOperands(expr.operator, left, right);
         return left <= right;
       case MINUS:
+        this.checkNumberOperands(expr.operator, left, right);
         return left - right;
       case PLUS:
-        if (left instanceof Number && right instanceof Number) {
+        if (left.constructor.toString().indexOf('Number') > -1 &&
+            right.constructor.toString().indexOf('Number') > -1) {
           return left + right;
         }
 
@@ -81,13 +131,17 @@ class Interpreter {
           return left + right;
         }
 
-        break;
+        throw new RuntimeError(expr.operator,
+          'Operands must be two numbers or two strings.');
       case SLASH:
+        this.checkNumberOperands(expr.operator, left, right);
         return left / right;
       case STAR:
+        this.checkNumberOperands(expr.operator, left, right);
         return left * right;
     }
 
     return null;
   }
 }
+module.exports = Interpreter;
