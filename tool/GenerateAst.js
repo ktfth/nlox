@@ -15,6 +15,11 @@ defineAst(outputDir, 'Expr', [
   'Unary    : Token operator, Expr right',
 ]);
 
+defineAst(outputDir, 'Stmt', [
+  'Expression : Expr expression',
+  'Print      : Expr expression',
+]);
+
 function defineAst(outputDir, baseName, types) {
   const filePath = path.join(outputDir, `${baseName}.js`);
   fs.appendFileSync(filePath, `class ${baseName} {\n`);

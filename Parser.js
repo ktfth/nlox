@@ -5,6 +5,10 @@ const {
   Literal,
   Grouping,
 } = require('./Expr');
+const {
+  Print,
+  Expression,
+} = require('./Stmt');
 const Lox = require('./lox');
 
 Object
@@ -35,18 +39,40 @@ class Parser {
     this.error = this.error.bind(this);
     this.synchronize = this.synchronize.bind(this);
     this.parse = this.parse.bind(this);
+    this.statement = this.statement.bind(this);
+    this.printStatement = this.printStatement.bind(this);
+    this.expressionStatement = this.expressionStatement.bind(this);
   }
 
   parse() {
-    try {
-      return this.expression();
-    } catch (error) {
-      return null;
+    const statements = [];
+    while (!this.isAtEnd()) {
+      statements.push(this.statement());
     }
+
+    return statements;
   }
 
   expression() {
     return this.equality();
+  }
+
+  statement() {
+    if (this.match(PRINT)) return this.printStatement();
+
+    return this.expressionStatement();
+  }
+
+  printStatement() {
+    const value = this.expression();
+    this.consume(SEMICOLON, 'Expect \';\' after value.');
+    return new Print(value);
+  }
+
+  expressionStatement() {
+    const expr = this.expression();
+    this.consume(SEMICOLON, 'Expect \';\' after expression.');
+    return Expression(expr);
   }
 
   equality() {
