@@ -126,7 +126,7 @@ class Scanner {
         break;
       case '/'.charCodeAt(0):
         if (this.match('/')) {
-          while (this.peek() !== '\n' && !this.isAtEnd()) this.advance();
+          while (this.peek() !== '\n'.charCodeAt(0) && !this.isAtEnd()) this.advance();
         } else {
           this.addToken(SLASH);
         }
@@ -183,8 +183,8 @@ class Scanner {
   }
 
   string() {
-    while (this.peek() !== '"' && !this.isAtEnd()) {
-      if (this.peek() === '\n') this.line++;
+    while (this.peek() !== '"'.charCodeAt(0) && !this.isAtEnd()) {
+      if (this.peek() === '\n'.charCodeAt(0)) this.line++;
       this.advance();
     }
 
@@ -206,7 +206,7 @@ class Scanner {
   number() {
     while (this.isDigit(this.peek())) this.advance();
 
-    if (this.peek() === '.' && this.isDigit(this.peekNext())) {
+    if (this.peek() === '.'.charCodeAt(0) && this.isDigit(this.peekNext())) {
       this.advance();
 
       while (this.isDigit(this.peek())) this.advance();
