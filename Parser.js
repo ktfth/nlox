@@ -4,10 +4,12 @@ const {
   Unary,
   Literal,
   Grouping,
+  Variable,
 } = require('./Expr');
 const {
   Print,
   Expression,
+  Var,
 } = require('./Stmt');
 const Lox = require('./lox');
 
@@ -42,12 +44,14 @@ class Parser {
     this.statement = this.statement.bind(this);
     this.printStatement = this.printStatement.bind(this);
     this.expressionStatement = this.expressionStatement.bind(this);
+    this.declaration = this.declaration.bind(this);
+    this.varDeclaration = this.varDeclaration.bind(this);
   }
 
   parse() {
     const statements = [];
     while (!this.isAtEnd()) {
-      statements.push(this.statement());
+      statements.push(this.declaration());
     }
 
     return statements;
@@ -55,6 +59,17 @@ class Parser {
 
   expression() {
     return this.equality();
+  }
+
+  declaration() {
+    try {
+      if (this.match(VAR)) return this.varDeclaration();
+
+      return this.statement();
+    } catch (error) {
+      this.synchronize();
+      return null;
+    }
   }
 
   statement() {
@@ -67,6 +82,18 @@ class Parser {
     const value = this.expression();
     this.consume(SEMICOLON, 'Expect \';\' after value.');
     return new Print(value);
+  }
+
+  varDeclaration() {
+    const name = this.consume(IDENTIFIER, 'Expect variable name.');
+
+    let initializer = null;
+    if (this.match(EQUAL)) {
+      initializer = this.expression();
+    }
+
+    this.consume(SEMICOLON, 'Expect \';\' after variable declaration.');
+    return new Var(name, initializer);
   }
 
   expressionStatement() {
@@ -140,6 +167,10 @@ class Parser {
 
     if (this.match(NUMBER, STRING)) {
       return new Literal(this.previous().literal);
+    }
+
+    if (this.match(IDENTIFIER)) {
+      return new Variable(this.previous());
     }
 
     if (this.match(LEFT_PAREN)) {

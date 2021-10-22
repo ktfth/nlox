@@ -56,3 +56,16 @@ class Unary extends Expr {
 
 }
 exports.Unary = Unary;
+
+class Variable extends Expr {
+  constructor(name) {
+    super(name);
+    this.name = name;
+  }
+
+  accept(visitor) {
+    return visitor.visitVariableExpr(this);
+  }
+
+}
+exports.Variable = Variable;

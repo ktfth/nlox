@@ -1,5 +1,6 @@
 const Lox = require('./lox');
 const TokenType = require('./TokenType');
+const Environment = require('./Environment');
 const RuntimeError = require('./RuntimeError');
 
 Object
@@ -8,6 +9,8 @@ Object
 
 class Interpreter {
   constructor() {
+    this.environment = new Environment();
+
     this.visitLiteralExpr = this.visitLiteralExpr.bind(this);
     this.visitGroupingExpr = this.visitGroupingExpr.bind(this);
     this.evaluate = this.evaluate.bind(this);
@@ -22,6 +25,8 @@ class Interpreter {
     this.visitExpressionStmt = this.visitExpressionStmt.bind(this);
     this.visitPrintStmt = this.visitPrintStmt.bind(this);
     this.execute = this.execute.bind(this);
+    this.visitVarStmt = this.visitVarStmt.bind(this);
+    this.visitVariableExpr = this.visitVariableExpr.bind(this);
   }
 
   interpret(statements) {
@@ -50,6 +55,10 @@ class Interpreter {
     }
 
     return null;
+  }
+
+  visitVariableExpr(expr) {
+    return this.environment.get(expr.name);
   }
 
   checkNumberOperand(operator, operand) {
@@ -113,6 +122,16 @@ class Interpreter {
   visitPrintStmt(stmt) {
     const value = this.evaluate(stmt.expression);
     console.log(this.stringify(value));
+    return null;
+  }
+
+  visitVarStmt(stmt) {
+    let value = null;
+    if (stmt.initializer !== null) {
+      value = this.evaluate(stmt.initializer);
+    }
+
+    this.environment.define(stmt.name.lexeme, value);
     return null;
   }
 

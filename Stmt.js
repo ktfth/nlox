@@ -27,3 +27,17 @@ class Print extends Stmt {
 
 }
 exports.Print = Print;
+
+class Var extends Stmt {
+  constructor(name, initializer) {
+    super(name, initializer);
+    this.name = name;
+    this.initializer = initializer;
+  }
+
+  accept(visitor) {
+    return visitor.visitVarStmt(this);
+  }
+
+}
+exports.Var = Var;

@@ -225,7 +225,7 @@ class Scanner {
     while (this.isAlphaNumeric(this.peek())) this.advance();
 
     const text = this.source.substring(this.start, this.current);
-    const type = keywords[text];
+    let type = keywords[text] || null;
     if (type === null) type = IDENTIFIER;
     this.addToken(type);
   }
