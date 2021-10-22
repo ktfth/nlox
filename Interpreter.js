@@ -165,7 +165,8 @@ class Interpreter {
           return left + right;
         }
 
-        if (left instanceof String && right instanceof String) {
+        if (left.constructor.toString().indexOf('String') > -1 &&
+            right.constructor.toString().indexOf('String') > -1) {
           return left + right;
         }
 
