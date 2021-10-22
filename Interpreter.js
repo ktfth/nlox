@@ -27,6 +27,7 @@ class Interpreter {
     this.execute = this.execute.bind(this);
     this.visitVarStmt = this.visitVarStmt.bind(this);
     this.visitVariableExpr = this.visitVariableExpr.bind(this);
+    this.visitAssignExpr = this.visitAssignExpr.bind(this);
   }
 
   interpret(statements) {
@@ -133,6 +134,12 @@ class Interpreter {
 
     this.environment.define(stmt.name.lexeme, value);
     return null;
+  }
+
+  visitAssignExpr(expr) {
+    const value = this.evaluate(expr.value);
+    this.environment.assign(expr.name, value);
+    return value;
   }
 
   visitBinaryExpr(expr) {

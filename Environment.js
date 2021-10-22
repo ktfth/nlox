@@ -6,6 +6,7 @@ class Environment {
 
     this.define = this.define.bind(this);
     this.get = this.get.bind(this);
+    this.assign = this.assign.bind(this);
   }
 
   define(name, value) {
@@ -15,6 +16,16 @@ class Environment {
   get(name) {
     if (this.values.has(name.lexeme)) {
       return this.values.get(name.lexeme);
+    }
+
+    throw new RuntimeError(name,
+      `Undefined variable '${name.lexeme}'.`);
+  }
+
+  assign(name, value) {
+    if (this.values.has(name.lexeme)) {
+      this.values.set(name.lexeme, value);
+      return;
     }
 
     throw new RuntimeError(name,

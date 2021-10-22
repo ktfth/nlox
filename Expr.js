@@ -2,6 +2,20 @@ class Expr {
 }
 exports.Expr = Expr;
 
+class Assign extends Expr {
+  constructor(name, value) {
+    super(name, value);
+    this.name = name;
+    this.value = value;
+  }
+
+  accept(visitor) {
+    return visitor.visitAssignExpr(this);
+  }
+
+}
+exports.Assign = Assign;
+
 class Binary extends Expr {
   constructor(left, operator, right) {
     super(left, operator, right);

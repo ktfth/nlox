@@ -5,6 +5,7 @@ const {
   Literal,
   Grouping,
   Variable,
+  Assign,
 } = require('./Expr');
 const {
   Print,
@@ -46,6 +47,7 @@ class Parser {
     this.expressionStatement = this.expressionStatement.bind(this);
     this.declaration = this.declaration.bind(this);
     this.varDeclaration = this.varDeclaration.bind(this);
+    this.assignment = this.assignment.bind(this);
   }
 
   parse() {
@@ -58,7 +60,7 @@ class Parser {
   }
 
   expression() {
-    return this.equality();
+    return this.assignment();
   }
 
   declaration() {
@@ -100,6 +102,24 @@ class Parser {
     const expr = this.expression();
     this.consume(SEMICOLON, 'Expect \';\' after expression.');
     return new Expression(expr);
+  }
+
+  assignment() {
+    const expr = this.equality();
+
+    if (this.match(EQUAL)) {
+      const equals = this.previous();
+      const value = this.assignment();
+
+      if (expr instanceof Variable) {
+        const name = expr.name;
+        return new Assign(name, value);
+      }
+
+      this.error(equals, 'Invalid assignment target.');
+    }
+
+    return expr;
   }
 
   equality() {
