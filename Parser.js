@@ -72,7 +72,7 @@ class Parser {
   expressionStatement() {
     const expr = this.expression();
     this.consume(SEMICOLON, 'Expect \';\' after expression.');
-    return Expression(expr);
+    return new Expression(expr);
   }
 
   equality() {

@@ -48,11 +48,11 @@ function run(source) {
   const scanner = new Scanner(source);
   const tokens = scanner.scanTokens();
   const parser = new Parser(tokens);
-  const expression = parser.parse();
+  const statements = parser.parse();
 
   if (hadError) return;
 
-  interpreter.interpret(expression);
+  interpreter.interpret(statements);
 }
 
 function report(line, where, message) {
@@ -61,10 +61,11 @@ function report(line, where, message) {
 }
 
 function error(token, message) {
+  if (token === 0) return;
   if (token.type === TokenType.EOF) {
-    report(token.line, ' at end', message);
+    report(token.line, 'at end', message);
   } else {
-    report(token.line, ` at \'${token.lexeme}\'`, message);
+    report(token.line, `at \'${token.lexeme}\'`, message);
   }
 }
 exports.error = error;

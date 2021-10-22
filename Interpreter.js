@@ -19,12 +19,16 @@ class Interpreter {
     this.checkNumberOperands = this.checkNumberOperands.bind(this);
     this.interpret = this.interpret.bind(this);
     this.stringify = this.stringify.bind(this);
+    this.visitExpressionStmt = this.visitExpressionStmt.bind(this);
+    this.visitPrintStmt = this.visitPrintStmt.bind(this);
+    this.execute = this.execute.bind(this);
   }
 
-  interpret(expression) {
+  interpret(statements) {
     try {
-      const value = this.evaluate(expression);
-      console.log(this.stringify(value));
+      for (let statement of statements) {
+        this.execute(statement);
+      }
     } catch (error) {
       Lox.runtimeError(error);
     }
@@ -95,6 +99,21 @@ class Interpreter {
 
   evaluate(expr) {
     return expr.accept(this);
+  }
+
+  execute(stmt) {
+    stmt.accept(this);
+  }
+
+  visitExpressionStmt(stmt) {
+    this.evaluate(stmt.expression);
+    return null;
+  }
+
+  visitPrintStmt(stmt) {
+    const value = this.evaluate(stmt.expression);
+    console.log(this.stringify(value));
+    return null;
   }
 
   visitBinaryExpr(expr) {
