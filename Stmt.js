@@ -2,6 +2,19 @@ class Stmt {
 }
 exports.Stmt = Stmt;
 
+class Block extends Stmt {
+  constructor(statements) {
+    super(statements);
+    this.statements = statements;
+  }
+
+  accept(visitor) {
+    return visitor.visitBlockStmt(this);
+  }
+
+}
+exports.Block = Block;
+
 class Expression extends Stmt {
   constructor(expression) {
     super(expression);

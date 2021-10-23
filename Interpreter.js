@@ -28,6 +28,8 @@ class Interpreter {
     this.visitVarStmt = this.visitVarStmt.bind(this);
     this.visitVariableExpr = this.visitVariableExpr.bind(this);
     this.visitAssignExpr = this.visitAssignExpr.bind(this);
+    this.visitBlockStmt = this.visitBlockStmt.bind(this);
+    this.executeBlock = this.executeBlock.bind(this);
   }
 
   interpret(statements) {
@@ -114,6 +116,24 @@ class Interpreter {
 
   execute(stmt) {
     stmt.accept(this);
+  }
+
+  executeBlock(statements, environment) {
+    const previous = this.environment;
+    try {
+      this.environment = environment;
+
+      for (let statement of statements) {
+        this.execute(statement);
+      }
+    } finally {
+      this.environment = previous;
+    }
+  }
+
+  visitBlockStmt(stmt) {
+    this.executeBlock(stmt.statements, new Environment(this.environment));
+    return null;
   }
 
   visitExpressionStmt(stmt) {

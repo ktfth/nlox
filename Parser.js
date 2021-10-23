@@ -11,6 +11,7 @@ const {
   Print,
   Expression,
   Var,
+  Block,
 } = require('./Stmt');
 const Lox = require('./lox');
 
@@ -48,6 +49,7 @@ class Parser {
     this.declaration = this.declaration.bind(this);
     this.varDeclaration = this.varDeclaration.bind(this);
     this.assignment = this.assignment.bind(this);
+    this.block = this.block.bind(this);
   }
 
   parse() {
@@ -76,6 +78,7 @@ class Parser {
 
   statement() {
     if (this.match(PRINT)) return this.printStatement();
+    if (this.match(LEFT_BRACE)) return new Block(this.block());
 
     return this.expressionStatement();
   }
@@ -102,6 +105,17 @@ class Parser {
     const expr = this.expression();
     this.consume(SEMICOLON, 'Expect \';\' after expression.');
     return new Expression(expr);
+  }
+
+  block() {
+    const statements = [];
+
+    while (!this.check(RIGHT_BRACE) && !this.isAtEnd()) {
+      statements.push(this.declaration());
+    }
+
+    this.consume(RIGHT_BRACE, 'Expect \'}\' after block.');
+    return statements;
   }
 
   assignment() {
