@@ -1,0 +1,4 @@
+if (false)
+  print "hello world";
+else
+  print "foo";

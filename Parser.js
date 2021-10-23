@@ -12,6 +12,7 @@ const {
   Expression,
   Var,
   Block,
+  If,
 } = require('./Stmt');
 const Lox = require('./lox');
 
@@ -50,6 +51,7 @@ class Parser {
     this.varDeclaration = this.varDeclaration.bind(this);
     this.assignment = this.assignment.bind(this);
     this.block = this.block.bind(this);
+    this.ifStatement = this.ifStatement.bind(this);
   }
 
   parse() {
@@ -77,10 +79,25 @@ class Parser {
   }
 
   statement() {
+    if (this.match(IF)) return this.ifStatement();
     if (this.match(PRINT)) return this.printStatement();
     if (this.match(LEFT_BRACE)) return new Block(this.block());
 
     return this.expressionStatement();
+  }
+
+  ifStatement() {
+    this.consume(LEFT_PAREN, 'Expect \'(\' after \'if\'.');
+    const condition = this.expression();
+    this.consume(RIGHT_PAREN, 'Expect \')\' after if condition.');
+
+    const thenBranch = this.statement();
+    let elseBranch = null;
+    if (this.match(ELSE)) {
+      elseBranch = this.statement();
+    }
+
+    return new If(condition, thenBranch, elseBranch);
   }
 
   printStatement() {

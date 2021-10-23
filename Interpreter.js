@@ -30,6 +30,7 @@ class Interpreter {
     this.visitAssignExpr = this.visitAssignExpr.bind(this);
     this.visitBlockStmt = this.visitBlockStmt.bind(this);
     this.executeBlock = this.executeBlock.bind(this);
+    this.visitIfStmt = this.visitIfStmt.bind(this);
   }
 
   interpret(statements) {
@@ -152,6 +153,15 @@ class Interpreter {
 
   visitExpressionStmt(stmt) {
     this.evaluate(stmt.expression);
+    return null;
+  }
+
+  visitIfStmt(stmt) {
+    if (this.isTruthy(this.evaluate(stmt.condition))) {
+      this.execute(stmt.thenBranch);
+    } else if (stmt.elseBranch !== null) {
+      this.execute(stmt.elseBranch);
+    }
     return null;
   }
 
