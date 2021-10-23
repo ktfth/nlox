@@ -39,9 +39,19 @@ async function runPrompt() {
   for (;;) {
     const line = await question('> ');
     if (line === null) break;
-    run(line);
+    runRepl(line);
     hadError = false;
   }
+}
+
+function runRepl(source) {
+  const scanner = new Scanner(source);
+  const tokens = scanner.scanTokens();
+  const parser = new Parser(tokens);
+
+  if (hadError) return;
+
+  interpreter.repl(parser.declaration());
 }
 
 function run(source) {

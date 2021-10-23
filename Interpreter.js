@@ -118,6 +118,20 @@ class Interpreter {
     stmt.accept(this);
   }
 
+  repl(stmt) {
+    try {
+      this.execute(stmt);
+    } catch (error) {
+      Lox.runtimeError(error);
+    } finally {
+      if (stmt === null || stmt.expression === undefined) return;
+      const value = this.evaluate(stmt.expression);
+      if (stmt.constructor.toString().indexOf('Print') === -1) {
+        console.log(this.stringify(value));
+      }
+    }
+  }
+
   executeBlock(statements, environment) {
     const previous = this.environment;
     try {
