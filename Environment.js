@@ -1,8 +1,9 @@
 const RuntimeError = require('./RuntimeError');
 
 class Environment {
-  constructor() {
+  constructor(enclosing) {
     this.values = new Map();
+    this.enclosing = enclosing;
 
     this.define = this.define.bind(this);
     this.get = this.get.bind(this);
@@ -18,6 +19,8 @@ class Environment {
       return this.values.get(name.lexeme);
     }
 
+    if (this.enclosing !== null) return this.enclosing.get(name);
+
     throw new RuntimeError(name,
       `Undefined variable '${name.lexeme}'.`);
   }
@@ -25,6 +28,11 @@ class Environment {
   assign(name, value) {
     if (this.values.has(name.lexeme)) {
       this.values.set(name.lexeme, value);
+      return;
+    }
+
+    if (this.enclosing !== null) {
+      this.enclosing.assign(name, value);
       return;
     }
 
