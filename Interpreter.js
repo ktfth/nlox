@@ -63,18 +63,19 @@ class Interpreter {
   }
 
   checkNumberOperand(operator, operand) {
-    if (operand instanceof Number) return;
+    if (operand.constructor.toString().indexOf('Number') > -1) return;
     throw new RuntimeError(operator, "Operand must be a number.");
   }
 
   checkNumberOperands(operator, left, right) {
-    if (left instanceof Number && right instanceof Number) return;
+    if (left.constructor.toString().indexOf('Number') > -1 &&
+        right.constructor.toString().indexOf('Number') > -1) return;
     throw new RuntimeError(operator, 'Operands must be numbers.');
   }
 
   isTruthy(object) {
     if (object === null) return false;
-    if (object instanceof Boolean) return object;
+    if (object.constructor.toString().indexOf('Boolean') > -1) return object;
     return true;
   }
 
@@ -88,7 +89,7 @@ class Interpreter {
   stringify(object) {
     if (object === null) return 'nil';
 
-    if (object instanceof Number) {
+    if (object.constructor.toString().indexOf('Number') > -1) {
       let text = object.toString();
       if (text.endsWith('.0')) {
         text = text.substring(0, text.length - 2);
@@ -96,7 +97,7 @@ class Interpreter {
       return text;
     }
 
-    if (object instanceof Object) {
+    if (object.constructor.toString().indexOf('Object') > -1) {
       return JSON.stringify(object);
     }
 
