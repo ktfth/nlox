@@ -31,6 +31,7 @@ class Interpreter {
     this.visitBlockStmt = this.visitBlockStmt.bind(this);
     this.executeBlock = this.executeBlock.bind(this);
     this.visitIfStmt = this.visitIfStmt.bind(this);
+    this.visitLogicalExpr = this.visitLogicalExpr.bind(this);
   }
 
   interpret(statements) {
@@ -45,6 +46,18 @@ class Interpreter {
 
   visitLiteralExpr(expr) {
     return expr.value;
+  }
+
+  visitLogicalExpr(expr) {
+    const left = this.evaluate(expr.left);
+
+    if (expr.operator.type === TokenType.OR) {
+      if (this.isTruthy(left)) return left;
+    } else {
+      if (!this.isTruthy(left)) return left;
+    }
+
+    return this.evaluate(expr.right);
   }
 
   visitUnaryExpr(expr) {

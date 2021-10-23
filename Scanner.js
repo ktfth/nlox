@@ -140,7 +140,7 @@ class Scanner {
         break;
       case '"'.charCodeAt(0): this.string(); break;
       case 'o'.charCodeAt(0):
-        if (this.match('r')) {
+        if (this.match('r'.charCodeAt(0))) {
           this.addToken(OR);
         }
         break;

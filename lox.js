@@ -51,7 +51,8 @@ function runRepl(source) {
 
   if (hadError) return;
 
-  interpreter.repl(parser.declaration());
+  const declaration = parser.declaration();
+  interpreter.repl(declaration);
 }
 
 function run(source) {

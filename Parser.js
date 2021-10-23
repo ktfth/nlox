@@ -6,6 +6,7 @@ const {
   Grouping,
   Variable,
   Assign,
+  Logical,
 } = require('./Expr');
 const {
   Print,
@@ -52,6 +53,8 @@ class Parser {
     this.assignment = this.assignment.bind(this);
     this.block = this.block.bind(this);
     this.ifStatement = this.ifStatement.bind(this);
+    this.or = this.or.bind(this);
+    this.and = this.and.bind(this);
   }
 
   parse() {
@@ -136,7 +139,7 @@ class Parser {
   }
 
   assignment() {
-    const expr = this.equality();
+    const expr = this.or();
 
     if (this.match(EQUAL)) {
       const equals = this.previous();
@@ -148,6 +151,30 @@ class Parser {
       }
 
       this.error(equals, 'Invalid assignment target.');
+    }
+
+    return expr;
+  }
+
+  or() {
+    let expr = this.and();
+
+    while (this.match(OR)) {
+      const operator = this.previous();
+      const right = this.and();
+      expr = new Logical(expr, operator, right);
+    }
+
+    return expr;
+  }
+
+  and() {
+    let expr = this.equality();
+
+    while (this.match(AND)) {
+      const operator = this.previous();
+      const right = this.equality();
+      expr = new Logical(expr, operator, right);
     }
 
     return expr;

@@ -57,6 +57,21 @@ class Literal extends Expr {
 }
 exports.Literal = Literal;
 
+class Logical extends Expr {
+  constructor(left, operator, right) {
+    super(left, operator, right);
+    this.left = left;
+    this.operator = operator;
+    this.right = right;
+  }
+
+  accept(visitor) {
+    return visitor.visitLogicalExpr(this);
+  }
+
+}
+exports.Logical = Logical;
+
 class Unary extends Expr {
   constructor(operator, right) {
     super(operator, right);
