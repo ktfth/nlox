@@ -8,10 +8,30 @@ class Environment {
     this.define = this.define.bind(this);
     this.get = this.get.bind(this);
     this.assign = this.assign.bind(this);
+    this.getAt = this.getAt.bind(this);
+    this.ancestor = this.ancestor.bind(this);
+    this.assignAt = this.assignAt.bind(this);
   }
 
   define(name, value) {
     this.values.set(name, value);
+  }
+
+  ancestor(distance) {
+    let environment = this;
+    for (let i = 0; i < distance; i += 1) {
+      environment = environment.enclosing;
+    }
+
+    return environment;
+  }
+
+  getAt(distance, name) {
+    return this.ancestor(distance).values.get(name);
+  }
+
+  assignAt(distance, name, value) {
+    this.ancestor(distance).values.set(name.lexeme, value);
   }
 
   get(name) {

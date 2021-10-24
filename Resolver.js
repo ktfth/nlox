@@ -20,6 +20,17 @@ class Resolver {
     this.visitAssignExpr = this.visitAssignExpr.bind(this);
     this.visitFnStmt = this.visitFnStmt.bind(this);
     this.resolveFn = this.resolveFn.bind(this);
+    this.visitExpressionStmt = this.visitExpressionStmt.bind(this);
+    this.visitIfStmt = this.visitIfStmt.bind(this);
+    this.visitPrintStmt = this.visitPrintStmt.bind(this);
+    this.visitReturnStmt = this.visitReturnStmt.bind(this);
+    this.visitWhileStmt = this.visitWhileStmt.bind(this);
+    this.visitBinaryExpr = this.visitBinaryExpr.bind(this);
+    this.visitCallExpr = this.visitCallExpr.bind(this);
+    this.visitGroupingExpr = this.visitGroupingExpr.bind(this);
+    this.visitLiteralExpr = this.visitLiteralExpr.bind(this);
+    this.visitLogicalExpr = this.visitLogicalExpr.bind(this);
+    this.visitUnaryExpr = this.visitUnaryExpr.bind(this);
   }
 
   visitBlockStmt(stmt) {
@@ -29,26 +40,96 @@ class Resolver {
     return null;
   }
 
+  visitExpressionStmt(stmt) {
+    this.resolve(stmt.expression);
+    return null;
+  }
+
   visitFnStmt(stmt) {
     this.declare(stmt.name);
     this.define(stmt.name);
 
-    this.resolveFn(stmtm);
+    this.resolveFn(stmt);
+    return null;
+  }
+
+  visitIfStmt(stmt) {
+    this.resolve(stmt.condition);
+    this.resolve(stmt.thenBranch);
+    if (stmt.elseBranch !== null) this.resolve(stmt.elseBranch);
+    return null;
+  }
+
+  visitPrintStmt(stmt) {
+    if (stmt.value !== null) {
+      this.resolve(stmt.value);
+    }
+
+    return null;
+  }
+
+  visitReturnStmt(stmt) {
+    if (stmt.value !== null) {
+      this.resolve(stmt.value);
+    }
+
     return null;
   }
 
   visitVarStmt(stmt) {
     this.declare(stmt.name);
     if (stmt.initializer !== null) {
-      this.resolveExpr(stmt.initializer);
+      this.resolveStmt(stmt.initializer);
     }
     this.define(stmt.name);
     return null;
   }
 
+  visitWhileStmt(stmt) {
+    this.resolve(stmt.condition);
+    this.resolve(stmt.body);
+    return null;
+  }
+
   visitAssignExpr(expr) {
-    this.resolve(expr.value);
+    this.resolveExpr(expr.value);
     this.resolveLocal(expr, expr.name);
+    return null;
+  }
+
+  visitBinaryExpr(expr) {
+    this.resolveExpr(expr.left);
+    this.resolveExpr(expr.right);
+    return null;
+  }
+
+  visitCallExpr(expr) {
+    this.resolveExpr(callee);
+
+    for (let argument of expr.args) {
+      this.resolveExpr(argument);
+    }
+
+    return null;
+  }
+
+  visitGroupingExpr(expr) {
+    this.resolveExpr(expr.expression);
+    return null;
+  }
+
+  visitLiteralExpr(expr) {
+    return null;
+  }
+
+  visitLogicalExpr(expr) {
+    this.resolveExpr(expr.left);
+    this.resolveExpr(expr.right);
+    return null;
+  }
+
+  visitUnaryExpr(expr) {
+    this.resolveExpr(expr.right);
     return null;
   }
 
@@ -64,8 +145,11 @@ class Resolver {
   }
 
   resolve(statements) {
-    for (let statement of statements) {
-      this.resolveStmt(statement);
+    if (statements !== undefined &&
+        statements.constructor.toString().indexOf('Array') > -1) {
+      for (let statement of statements) {
+        this.resolveStmt(statement);
+      }
     }
   }
 
@@ -84,13 +168,17 @@ class Resolver {
   }
 
   endScope() {
-    this.scope.pop();
+    this.scopes.pop();
   }
 
   declare(name) {
     if (this.scopes.length === 0) return;
 
     const scope = this.scopes[0];
+    if (scope.has(name.lexeme)) {
+      Lox.error(name,
+        'Already a variable with this name in this scope.');
+    }
     scope.set(name.lexeme, false);
   }
 

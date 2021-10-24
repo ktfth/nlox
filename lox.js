@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
+const Parser = require('./Parser');
 const readline = require('readline');
 const Scanner = require('./Scanner');
-const Parser = require('./Parser');
-const AstPrinter = require('./AstPrinter');
+const Resolver = require('./Resolver');
 const TokenType = require('./TokenType');
+const AstPrinter = require('./AstPrinter');
 const Interpreter = require('./Interpreter');
 
 const args = process.argv.slice(2);
@@ -50,6 +51,8 @@ function runRepl(source) {
   const parser = new Parser(tokens);
 
   if (hadError) return;
+  const resolver = new Resolver(interpreter);
+  resolver.resolve(statements);
 
   const declaration = parser.declaration();
   interpreter.repl(declaration);
@@ -62,6 +65,9 @@ function run(source) {
   const statements = parser.parse();
 
   if (hadError) return;
+
+  const resolver = new Resolver(interpreter);
+  resolver.resolve(statements);
 
   interpreter.interpret(statements);
 }
