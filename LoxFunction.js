@@ -1,15 +1,16 @@
 const Environment = require('./Environment');
 
 class LoxFunction {
-  constructor(declaration) {
+  constructor(declaration, closure) {
     this.declaration = declaration;
+    this.closure = closure;
 
     this.call = this.call.bind(this);
     this.arity = this.arity.bind(this);
   }
 
   call(interpreter, args) {
-    const environment = new Environment(interpreter.globals);
+    const environment = new Environment(this.closure);
     for (let i = 0; i < this.declaration.params.length; i++) {
       environment.define(this.declaration.params[i].lexeme,
         args[i]);

@@ -197,7 +197,7 @@ class Interpreter {
   }
 
   visitFnStmt(stmt) {
-    const fn = new LoxFunction(stmt);
+    const fn = new LoxFunction(stmt, this.environment);
     this.environment.define(stmt.name.lexeme, fn);
     return null;
   }
