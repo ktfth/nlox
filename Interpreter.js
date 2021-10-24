@@ -308,7 +308,7 @@ class Interpreter {
         'Can only call functions and classes.');
     }
 
-    const fn = new LoxCallable(callee);
+    const fn = callee;
     if (args.length !== fn.arity()) {
       throw new RuntimeError(expr.paren, 'Expect ' +
         fn.arity() + ' arguments but got ' +
