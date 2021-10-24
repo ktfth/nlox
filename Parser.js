@@ -191,6 +191,7 @@ class Parser {
 
   fn(kind) {
     const name = this.consume(IDENTIFIER, `Expect ${kind} name.`);
+    this.consume(LEFT_PAREN, `Expect \'(\' after ${kind} name.`);
     const parameters = [];
     if (!this.check(RIGHT_PAREN)) {
       do {
@@ -198,9 +199,9 @@ class Parser {
           this.error(this.peek(), 'Can\'t have more than 255 parameters.');
         }
 
-        parameters.push(
-          this.consume(IDENTIFIER, 'Expect parameter name.')
-        );
+        const param = this.consume(IDENTIFIER, 'Expect parameter name.');
+
+        parameters.push(param);
       } while (this.match(COMMA));
     }
     this.consume(RIGHT_PAREN, 'Expect \')\' after parameters.');

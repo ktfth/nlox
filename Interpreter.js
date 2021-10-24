@@ -2,6 +2,7 @@ const Lox = require('./lox');
 const TokenType = require('./TokenType');
 const Environment = require('./Environment');
 const LoxCallable = require('./LoxCallable');
+const LoxFunction = require('./LoxFunction');
 const RuntimeError = require('./RuntimeError');
 
 Object
@@ -55,6 +56,7 @@ class Interpreter {
     this.visitLogicalExpr = this.visitLogicalExpr.bind(this);
     this.visitWhileStmt = this.visitWhileStmt.bind(this);
     this.visitCallExpr = this.visitCallExpr.bind(this);
+    this.visitFnStmt = this.visitFnStmt.bind(this);
   }
 
   interpret(statements) {
@@ -189,6 +191,12 @@ class Interpreter {
 
   visitExpressionStmt(stmt) {
     this.evaluate(stmt.expression);
+    return null;
+  }
+
+  visitFnStmt(stmt) {
+    const fn = new LoxFunction(stmt);
+    this.environment.define(stmt.name.lexeme, fn);
     return null;
   }
 
