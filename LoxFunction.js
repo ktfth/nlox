@@ -11,7 +11,7 @@ class LoxFunction {
   call(interpreter, args) {
     const environment = new Environment(interpreter.globals);
     for (let i = 0; i < this.declaration.params.length; i++) {
-      environment.define(declaration.params[i].lexeme,
+      environment.define(this.declaration.params[i].lexeme,
         args[i]);
     }
 

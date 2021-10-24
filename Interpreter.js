@@ -301,7 +301,7 @@ class Interpreter {
 
     const fn = new LoxCallable(callee);
     if (args.length !== fn.arity()) {
-      throw new RuntimeError(expr.paren, 'Expect' +
+      throw new RuntimeError(expr.paren, 'Expect ' +
         fn.arity() + ' arguments but got ' +
         args.length + '.');
     }

@@ -1,0 +1,5 @@
+fun greeting(name) {
+  print "Hello " + name;
+}
+
+greeting("John");
