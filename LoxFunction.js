@@ -15,7 +15,11 @@ class LoxFunction {
         args[i]);
     }
 
-    interpreter.executeBlock(this.declaration.body, environment);
+    try {
+      interpreter.executeBlock(this.declaration.body, environment);
+    } catch (returnValue) {
+      return returnValue.value;
+    }
     return null;
   }
 

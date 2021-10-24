@@ -71,6 +71,20 @@ class Print extends Stmt {
 }
 exports.Print = Print;
 
+class Return extends Stmt {
+  constructor(keyword, value) {
+    super(keyword, value);
+    this.keyword = keyword;
+    this.value = value;
+  }
+
+  accept(visitor) {
+    return visitor.visitReturnStmt(this);
+  }
+
+}
+exports.Return = Return;
+
 class Var extends Stmt {
   constructor(name, initializer) {
     super(name, initializer);

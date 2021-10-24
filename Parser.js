@@ -17,6 +17,7 @@ const {
   If,
   While,
   Fn,
+  Return,
 } = require('./Stmt');
 const Lox = require('./lox');
 
@@ -63,6 +64,7 @@ class Parser {
     this.call = this.call.bind(this);
     this.finishCall = this.finishCall.bind(this);
     this.fn = this.fn.bind(this);
+    this.returnStatement = this.returnStatement.bind(this);
   }
 
   parse() {
@@ -94,6 +96,7 @@ class Parser {
     if (this.match(FOR)) return this.forStatement();
     if (this.match(IF)) return this.ifStatement();
     if (this.match(PRINT)) return this.printStatement();
+    if (this.match(RETURN)) return this.returnStatement();
     if (this.match(WHILE)) return this.whileStatement();
     if (this.match(LEFT_BRACE)) return new Block(this.block());
 
@@ -160,6 +163,17 @@ class Parser {
     const value = this.expression();
     this.consume(SEMICOLON, 'Expect \';\' after value.');
     return new Print(value);
+  }
+
+  returnStatement() {
+    const keyword = this.previous();
+    let value = null;
+    if (!this.check(SEMICOLON)) {
+      value = this.expression();
+    }
+
+    this.consume(SEMICOLON, 'Expect \';\' after return value.');
+    return new Return(keyword, value);
   }
 
   varDeclaration() {

@@ -4,6 +4,7 @@ const Environment = require('./Environment');
 const LoxCallable = require('./LoxCallable');
 const LoxFunction = require('./LoxFunction');
 const RuntimeError = require('./RuntimeError');
+const Return = require('./Return');
 
 Object
   .keys(TokenType)
@@ -57,6 +58,7 @@ class Interpreter {
     this.visitWhileStmt = this.visitWhileStmt.bind(this);
     this.visitCallExpr = this.visitCallExpr.bind(this);
     this.visitFnStmt = this.visitFnStmt.bind(this);
+    this.visitReturnStmt = this.visitReturnStmt.bind(this);
   }
 
   interpret(statements) {
@@ -128,9 +130,9 @@ class Interpreter {
   }
 
   stringify(object) {
-    if (object === null) return 'nil';
+    if (object === null || object === undefined) return 'nil';
 
-    if (object.constructor.toString().indexOf('Number') > -1) {
+    if (object !== undefined && object.constructor.toString().indexOf('Number') > -1) {
       let text = object.toString();
       if (text.endsWith('.0')) {
         text = text.substring(0, text.length - 2);
@@ -138,7 +140,7 @@ class Interpreter {
       return text;
     }
 
-    if (object.constructor.toString().indexOf('Object') > -1) {
+    if (object !== undefined && object.constructor.toString().indexOf('Object') > -1) {
       return JSON.stringify(object);
     }
 
@@ -215,6 +217,13 @@ class Interpreter {
     return null;
   }
 
+  visitReturnStmt(stmt) {
+    let value = null;
+    if (stmt.value !== null) value = this.evaluate(stmt.value);
+
+    throw new Return(value);
+  }
+
   visitVarStmt(stmt) {
     let value = null;
     if (stmt.initializer !== null) {
@@ -263,13 +272,13 @@ class Interpreter {
         this.checkNumberOperands(expr.operator, left, right);
         return left - right;
       case PLUS:
-        if (left !== null && left.constructor.toString().indexOf('Number') > -1 &&
-            right !== null && right.constructor.toString().indexOf('Number') > -1) {
+        if (left !== undefined && left !== null && left.constructor.toString().indexOf('Number') > -1 &&
+            right !== undefined && right !== null && right.constructor.toString().indexOf('Number') > -1) {
           return left + right;
         }
 
-        if (left !== null && left.constructor.toString().indexOf('String') > -1 &&
-            right !== null && right.constructor.toString().indexOf('String') > -1) {
+        if (left !== undefined && left !== null && left.constructor.toString().indexOf('String') > -1 &&
+            right !== undefined && right !== null && right.constructor.toString().indexOf('String') > -1) {
           return left + right;
         }
 
