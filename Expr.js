@@ -31,6 +31,21 @@ class Binary extends Expr {
 }
 exports.Binary = Binary;
 
+class Call extends Expr {
+  constructor(callee, paren, args) {
+    super(callee, paren, args);
+    this.callee = callee;
+    this.paren = paren;
+    this.args = args;
+  }
+
+  accept(visitor) {
+    return visitor.visitCallExpr(this);
+  }
+
+}
+exports.Call = Call;
+
 class Grouping extends Expr {
   constructor(expression) {
     super(expression);

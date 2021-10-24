@@ -1,15 +1,36 @@
 const Lox = require('./lox');
 const TokenType = require('./TokenType');
 const Environment = require('./Environment');
+const LoxCallable = require('./LoxCallable');
 const RuntimeError = require('./RuntimeError');
 
 Object
   .keys(TokenType)
   .forEach(tokenType => global[tokenType] = TokenType[tokenType]);
 
+class Clock extends LoxCallable {
+  constructor(callee) {
+    super(callee);
+
+    this.arity = this.arity.bind(this);
+    this.call = this.call.bind(this);
+  }
+
+  arity() {
+    return 0;
+  }
+
+  call(interpreter, args) {
+    return (new Date()).getMilliseconds() / 1000.0;
+  }
+}
+
 class Interpreter {
   constructor() {
-    this.environment = new Environment();
+    this.globals = new Environment();
+    this.environment = this.globals;
+
+    this.globals.define('clock', new Clock());
 
     this.visitLiteralExpr = this.visitLiteralExpr.bind(this);
     this.visitGroupingExpr = this.visitGroupingExpr.bind(this);
@@ -33,6 +54,7 @@ class Interpreter {
     this.visitIfStmt = this.visitIfStmt.bind(this);
     this.visitLogicalExpr = this.visitLogicalExpr.bind(this);
     this.visitWhileStmt = this.visitWhileStmt.bind(this);
+    this.visitCallExpr = this.visitCallExpr.bind(this);
   }
 
   interpret(statements) {
@@ -254,6 +276,28 @@ class Interpreter {
     }
 
     return null;
+  }
+
+  visitCallExpr(expr) {
+    const callee = this.evaluate(expr.callee);
+
+    const args = [];
+    for (let argument of expr.args) {
+      args.push(this.evaluate(argument));
+    }
+
+    if (callee.constructor.toString().indexOf('Function') === -1) {
+      throw new RuntimeError(expr.paren,
+        'Can only call functions and classes.');
+    }
+
+    const fn = new LoxCallable(callee);
+    if (args.length !== fn.arity()) {
+      throw new RuntimeError(expr.paren, 'Expect' +
+        fn.arity() + ' arguments but got ' +
+        args.length + '.');
+    }
+    return fn.call(this, args);
   }
 }
 module.exports = Interpreter;

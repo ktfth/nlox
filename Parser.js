@@ -7,6 +7,7 @@ const {
   Variable,
   Assign,
   Logical,
+  Call,
 } = require('./Expr');
 const {
   Print,
@@ -58,6 +59,8 @@ class Parser {
     this.and = this.and.bind(this);
     this.whileStatement = this.whileStatement.bind(this);
     this.forStatement = this.forStatement.bind(this);
+    this.call = this.call.bind(this);
+    this.finishCall = this.finishCall.bind(this);
   }
 
   parse() {
@@ -291,7 +294,38 @@ class Parser {
       return new Unary(operator, right);
     }
 
-    return this.primary();
+    return this.call();
+  }
+
+  finishCall(callee) {
+    const args = [];
+    if (!this.check(RIGHT_PAREN)) {
+      do {
+        if (args.length >= 255) {
+          this.error(this.peek(), 'Can\'t have more than 255 arugments.');
+        }
+        args.push(this.expression());
+      } while (this.match(COMMA));
+    }
+
+    const paren = this.consume(RIGHT_PAREN,
+                               'Expect \')\' after arguments.');
+
+    return new Call(callee, paren, args);
+  }
+
+  call() {
+    let expr = this.primary();
+
+    while (true) {
+      if (this.match(LEFT_PAREN)) {
+        expr = this.finishCall(expr);
+      } else {
+        break;
+      }
+    }
+
+    return expr;
   }
 
   primary() {
