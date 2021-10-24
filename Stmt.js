@@ -28,6 +28,21 @@ class Expression extends Stmt {
 }
 exports.Expression = Expression;
 
+class Fn extends Stmt {
+  constructor(name, params, body) {
+    super(name, params, body);
+    this.name = name;
+    this.params = params;
+    this.body = body;
+  }
+
+  accept(visitor) {
+    return visitor.visitFnStmt(this);
+  }
+
+}
+exports.Fn = Fn;
+
 class If extends Stmt {
   constructor(condition, thenBranch, elseBranch) {
     super(condition, thenBranch, elseBranch);

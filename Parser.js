@@ -16,6 +16,7 @@ const {
   Block,
   If,
   While,
+  Fn,
 } = require('./Stmt');
 const Lox = require('./lox');
 
@@ -61,6 +62,7 @@ class Parser {
     this.forStatement = this.forStatement.bind(this);
     this.call = this.call.bind(this);
     this.finishCall = this.finishCall.bind(this);
+    this.fn = this.fn.bind(this);
   }
 
   parse() {
@@ -78,6 +80,7 @@ class Parser {
 
   declaration() {
     try {
+      if (this.match(FUN)) return this.fn('function');
       if (this.match(VAR)) return this.varDeclaration();
 
       return this.statement();
@@ -184,6 +187,27 @@ class Parser {
     const expr = this.expression();
     this.consume(SEMICOLON, 'Expect \';\' after expression.');
     return new Expression(expr);
+  }
+
+  fn(kind) {
+    const name = this.consume(IDENTIFIER, `Expect ${kind} name.`);
+    const parameters = [];
+    if (!this.check(RIGHT_PAREN)) {
+      do {
+        if (parameters.length >= 255) {
+          this.error(this.peek(), 'Can\'t have more than 255 parameters.');
+        }
+
+        parameters.push(
+          this.consume(IDENTIFIER, 'Expect parameter name.')
+        );
+      } while (this.match(COMMA));
+    }
+    this.consume(RIGHT_PAREN, 'Expect \')\' after parameters.');
+
+    this.consume(LEFT_BRACE, `Expect \'{\' before ${kind} body.`);
+    const body = this.block();
+    return new Fn(name, parameters, body);
   }
 
   block() {

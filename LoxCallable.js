@@ -11,7 +11,7 @@ class LoxCallable {
   }
 
   arity() {
-    
+    return 0;
   }
 }
 module.exports = LoxCallable;

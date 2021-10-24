@@ -22,6 +22,8 @@ defineAst(outputDir, 'Expr', [
 defineAst(outputDir, 'Stmt', [
   'Block      : List<Stmt> statements',
   'Expression : Expr expression',
+  'Fn   : Token name, List<Token> params,' +
+              ' List<Stmt> body',
   'If         : Expr condition, Stmt thenBranch,' +
               ' Stmt elseBranch',
   'Print      : Expr expression',
