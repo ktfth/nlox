@@ -256,7 +256,8 @@ class Parser {
     if (this.match(NIL)) return new Literal(null);
 
     if (this.match(NUMBER, STRING)) {
-      return new Literal(this.previous().literal);
+      return new Literal(
+        this.previous().literal === null ? 0 : this.previous().literal);
     }
 
     if (this.match(IDENTIFIER)) {

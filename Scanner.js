@@ -178,7 +178,7 @@ class Scanner {
   }
 
   peek() {
-    if (this.isAtEnd()) return '\0';
+    if (this.isAtEnd()) return '\0'.charCodeAt(0);
     return this.source.charCodeAt(this.current);
   }
 
