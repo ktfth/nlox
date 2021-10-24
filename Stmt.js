@@ -69,3 +69,17 @@ class Var extends Stmt {
 
 }
 exports.Var = Var;
+
+class While extends Stmt {
+  constructor(condition, body) {
+    super(condition, body);
+    this.condition = condition;
+    this.body = body;
+  }
+
+  accept(visitor) {
+    return visitor.visitWhileStmt(this);
+  }
+
+}
+exports.While = While;

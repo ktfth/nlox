@@ -32,6 +32,7 @@ class Interpreter {
     this.executeBlock = this.executeBlock.bind(this);
     this.visitIfStmt = this.visitIfStmt.bind(this);
     this.visitLogicalExpr = this.visitLogicalExpr.bind(this);
+    this.visitWhileStmt = this.visitWhileStmt.bind(this);
   }
 
   interpret(statements) {
@@ -84,8 +85,8 @@ class Interpreter {
   }
 
   checkNumberOperands(operator, left, right) {
-    if (left.constructor.toString().indexOf('Number') > -1 &&
-        right.constructor.toString().indexOf('Number') > -1) return;
+    if (left !== null && left.constructor.toString().indexOf('Number') > -1 &&
+        right !== null && right.constructor.toString().indexOf('Number') > -1) return;
     throw new RuntimeError(operator, 'Operands must be numbers.');
   }
 
@@ -194,6 +195,13 @@ class Interpreter {
     return null;
   }
 
+  visitWhileStmt(stmt) {
+    while (this.isTruthy(this.evaluate(stmt.condition))) {
+      this.execute(stmt.body);
+    }
+    return null;
+  }
+
   visitAssignExpr(expr) {
     const value = this.evaluate(expr.value);
     this.environment.assign(expr.name, value);
@@ -225,13 +233,13 @@ class Interpreter {
         this.checkNumberOperands(expr.operator, left, right);
         return left - right;
       case PLUS:
-        if (left.constructor.toString().indexOf('Number') > -1 &&
-            right.constructor.toString().indexOf('Number') > -1) {
+        if (left !== null && left.constructor.toString().indexOf('Number') > -1 &&
+            right !== null && right.constructor.toString().indexOf('Number') > -1) {
           return left + right;
         }
 
-        if (left.constructor.toString().indexOf('String') > -1 &&
-            right.constructor.toString().indexOf('String') > -1) {
+        if (left !== null && left.constructor.toString().indexOf('String') > -1 &&
+            right !== null && right.constructor.toString().indexOf('String') > -1) {
           return left + right;
         }
 

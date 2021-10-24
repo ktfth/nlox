@@ -25,6 +25,7 @@ defineAst(outputDir, 'Stmt', [
               ' Stmt elseBranch',
   'Print      : Expr expression',
   'Var        : Token name, Expr initializer',
+  'While      : Expr condition, Stmt body',
 ]);
 
 function defineAst(outputDir, baseName, types) {

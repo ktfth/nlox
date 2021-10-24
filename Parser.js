@@ -14,6 +14,7 @@ const {
   Var,
   Block,
   If,
+  While,
 } = require('./Stmt');
 const Lox = require('./lox');
 
@@ -55,6 +56,7 @@ class Parser {
     this.ifStatement = this.ifStatement.bind(this);
     this.or = this.or.bind(this);
     this.and = this.and.bind(this);
+    this.whileStatement = this.whileStatement.bind(this);
   }
 
   parse() {
@@ -84,6 +86,7 @@ class Parser {
   statement() {
     if (this.match(IF)) return this.ifStatement();
     if (this.match(PRINT)) return this.printStatement();
+    if (this.match(WHILE)) return this.whileStatement();
     if (this.match(LEFT_BRACE)) return new Block(this.block());
 
     return this.expressionStatement();
@@ -121,6 +124,15 @@ class Parser {
     return new Var(name, initializer);
   }
 
+  whileStatement() {
+    this.consume(LEFT_PAREN, 'Expect \'(\' after \'while\'.');
+    const condition = this.expression();
+    this.consume(RIGHT_PAREN, 'Expect \')\' after condition.');
+    const body = this.statement();
+
+    return new While(condition, body);
+  }
+
   expressionStatement() {
     const expr = this.expression();
     this.consume(SEMICOLON, 'Expect \';\' after expression.');
@@ -145,7 +157,7 @@ class Parser {
       const equals = this.previous();
       const value = this.assignment();
 
-      if (expr instanceof Variable) {
+      if (expr.constructor.toString().indexOf('Variable') > -1) {
         const name = expr.name;
         return new Assign(name, value);
       }

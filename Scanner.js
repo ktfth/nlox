@@ -113,19 +113,19 @@ class Scanner {
       case ';'.charCodeAt(0): this.addToken(SEMICOLON); break;
       case '*'.charCodeAt(0): this.addToken(STAR); break;
       case '!'.charCodeAt(0):
-        this.addToken(this.match('=') ? BANG_EQUAL : BANG);
+        this.addToken(this.match('='.charCodeAt(0)) ? BANG_EQUAL : BANG);
         break;
       case '='.charCodeAt(0):
-        this.addToken(this.match('=') ? EQUAL_EQUAL : EQUAL);
+        this.addToken(this.match('='.charCodeAt(0)) ? EQUAL_EQUAL : EQUAL);
         break;
       case '<'.charCodeAt(0):
-        this.addToken(this.match('=') ? LESS_EQUAL : LESS);
+        this.addToken(this.match('='.charCodeAt(0)) ? LESS_EQUAL : LESS);
         break;
       case '>'.charCodeAt(0):
-        this.addToken(this.match('=') ? GREATER_EQUAL : GREATER);
+        this.addToken(this.match('='.charCodeAt(0)) ? GREATER_EQUAL : GREATER);
         break;
       case '/'.charCodeAt(0):
-        if (this.match('/')) {
+        if (this.match('/'.charCodeAt(0))) {
           while (this.peek() !== '\n'.charCodeAt(0) && !this.isAtEnd()) this.advance();
         } else {
           this.addToken(SLASH);
@@ -213,7 +213,7 @@ class Scanner {
     }
 
     this.addToken(NUMBER,
-      parseFloat(this.source.substring(this.start, this.current)), 10);
+      parseFloat(this.source.substring(this.start, this.current), 10));
   }
 
   peekNext() {
