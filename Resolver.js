@@ -1,10 +1,16 @@
 const Lox = require('./lox');
 
+const FunctionType = {
+  NONE: 0,
+  FUNCTION: 1,
+};
+
 class Resolver {
   constructor(interpreter) {
     this.interpreter = interpreter;
 
     this.scopes = [];
+    this.currentFunction = FunctionType.NONE;
 
     this.visitBlockStmt = this.visitBlockStmt.bind(this);
     this.resolve = this.resolve.bind(this);
@@ -49,7 +55,7 @@ class Resolver {
     this.declare(stmt.name);
     this.define(stmt.name);
 
-    this.resolveFn(stmt);
+    this.resolveFn(stmt, FunctionType.FUNCTION);
     return null;
   }
 
@@ -153,7 +159,9 @@ class Resolver {
     }
   }
 
-  resolveFn(fn) {
+  resolveFn(fn, type) {
+    const enclosingFunction = this.currentFunction;
+    this.currentFunction = type;
     this.beginScope();
     for (let param of fn.params) {
       this.declare(param);
@@ -161,6 +169,7 @@ class Resolver {
     }
     this.resolve(fn.body);
     this.endScope();
+    this.currentFunction = enclosingFunction;
   }
 
   beginScope() {
