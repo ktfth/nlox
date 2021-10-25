@@ -21,6 +21,7 @@ defineAst(outputDir, 'Expr', [
 
 defineAst(outputDir, 'Stmt', [
   'Block      : List<Stmt> statements',
+  'Class      : Token name, List<Stmt.Fn> methods',
   'Expression : Expr expression',
   'Fn   : Token name, List<Token> params,' +
               ' List<Stmt> body',

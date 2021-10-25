@@ -37,12 +37,19 @@ class Resolver {
     this.visitLiteralExpr = this.visitLiteralExpr.bind(this);
     this.visitLogicalExpr = this.visitLogicalExpr.bind(this);
     this.visitUnaryExpr = this.visitUnaryExpr.bind(this);
+    this.visitClassStmt = this.visitClassStmt.bind(this);
   }
 
   visitBlockStmt(stmt) {
     this.beginScope();
     this.resolve(stmt.statements);
     this.endScope();
+    return null;
+  }
+
+  visitClassStmt(stmt) {
+    this.declare(stmt.name);
+    this.define(stmt.name);
     return null;
   }
 

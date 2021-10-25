@@ -1,4 +1,5 @@
 const Lox = require('./lox');
+const LoxClass = require('./LoxClass');
 const TokenType = require('./TokenType');
 const Environment = require('./Environment');
 const LoxCallable = require('./LoxCallable');
@@ -62,6 +63,7 @@ class Interpreter {
     this.visitReturnStmt = this.visitReturnStmt.bind(this);
     this.resolve = this.resolve.bind(this);
     this.lookUpVariable = this.lookUpVariable.bind(this);
+    this.visitClassStmt = this.visitClassStmt.bind(this);
   }
 
   interpret(statements) {
@@ -205,6 +207,13 @@ class Interpreter {
 
   visitBlockStmt(stmt) {
     this.executeBlock(stmt.statements, new Environment(this.environment));
+    return null;
+  }
+
+  visitClassStmt(stmt) {
+    this.environment.define(stmt.name.lexeme, null);
+    const klass = new LoxClass(stmt.name.lexeme);
+    this.environment.assign(stmt.name, klass);
     return null;
   }
 

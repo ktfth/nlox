@@ -15,6 +15,20 @@ class Block extends Stmt {
 }
 exports.Block = Block;
 
+class Class extends Stmt {
+  constructor(name, methods) {
+    super(name, methods);
+    this.name = name;
+    this.methods = methods;
+  }
+
+  accept(visitor) {
+    return visitor.visitClassStmt(this);
+  }
+
+}
+exports.Class = Class;
+
 class Expression extends Stmt {
   constructor(expression) {
     super(expression);

@@ -18,6 +18,7 @@ const {
   While,
   Fn,
   Return,
+  Class,
 } = require('./Stmt');
 const Lox = require('./lox');
 
@@ -65,6 +66,7 @@ class Parser {
     this.finishCall = this.finishCall.bind(this);
     this.fn = this.fn.bind(this);
     this.returnStatement = this.returnStatement.bind(this);
+    this.classDeclaration = this.classDeclaration.bind(this);
   }
 
   parse() {
@@ -82,6 +84,7 @@ class Parser {
 
   declaration() {
     try {
+      if (this.match(CLASS)) return this.classDeclaration();
       if (this.match(FUN)) return this.fn('function');
       if (this.match(VAR)) return this.varDeclaration();
 
@@ -90,6 +93,20 @@ class Parser {
       this.synchronize();
       return null;
     }
+  }
+
+  classDeclaration() {
+    const name = this.consume(IDENTIFIER, 'Expect class name.');
+    this.consume(LEFT_BRACE, 'Expect \'{\' before class body.');
+
+    const methods = [];
+    while (!this.check(RIGHT_BRACE) && !this.isAtEnd()) {
+      methods.push(this.fn('method'));
+    }
+
+    this.consume(RIGHT_BRACE, 'Expect \'}\' after class body.');
+
+    return new Class(name, methods);
   }
 
   statement() {
