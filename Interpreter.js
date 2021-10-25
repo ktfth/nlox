@@ -337,7 +337,16 @@ class Interpreter {
       args.push(this.evaluate(argument));
     }
 
-    if (callee.constructor.toString().indexOf('Function') === -1) {
+    let flagLoxClass = false;
+    let flagFunction = false;
+
+    const hasLoxClass = callee.constructor.toString().indexOf('LoxClass') > -1;
+    const hasFunction = callee.constructor.toString().indexOf('Function') > -1;
+
+    if (hasLoxClass) flagLoxClass = true;
+    if (hasFunction) flagFunction = true;
+
+    if ((!hasFunction && !flagLoxClass) || (!hasLoxClass && !flagFunction)) {
       throw new RuntimeError(expr.paren,
         'Can only call functions and classes.');
     }
