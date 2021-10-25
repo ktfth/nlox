@@ -110,7 +110,7 @@ class Resolver {
   }
 
   visitCallExpr(expr) {
-    this.resolveExpr(callee);
+    this.resolveExpr(expr.callee);
 
     for (let argument of expr.args) {
       this.resolveExpr(argument);
@@ -155,6 +155,12 @@ class Resolver {
         statements.constructor.toString().indexOf('Array') > -1) {
       for (let statement of statements) {
         this.resolveStmt(statement);
+      }
+    } else {
+      if (statements !== undefined && statements.constructor.toString().indexOf('Expr') > -1) {
+        this.resolveExpr(statements);
+      } else if (statements !== undefined && statements.constructor.toString().indexOf('Stmt') > -1) {
+        this.resolveStmt(statements);
       }
     }
   }

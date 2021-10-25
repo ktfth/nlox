@@ -27,7 +27,15 @@ class Environment {
   }
 
   getAt(distance, name) {
-    return this.ancestor(distance).values.get(name);
+    const self = this;
+    if (distance > 1) {
+      return this.ancestor(distance).values.get(name);
+    } else {
+      const currentName = {
+        lexeme: name,
+      };
+      return self.get(currentName);
+    }
   }
 
   assignAt(distance, name, value) {

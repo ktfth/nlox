@@ -109,7 +109,7 @@ class Interpreter {
   }
 
   lookUpVariable(name, expr) {
-    const distance = this.locals.get(expr);
+    const distance = this.locals.get(JSON.stringify(expr));
     if (distance !== null) {
       return this.environment.getAt(distance, name.lexeme);
     } else {
@@ -172,7 +172,7 @@ class Interpreter {
   }
 
   resolve(expr, depth) {
-    this.locals.set(expr, depth);
+    this.locals.set(JSON.stringify(expr), depth);
   }
 
   repl(stmt) {
@@ -260,7 +260,7 @@ class Interpreter {
   visitAssignExpr(expr) {
     const value = this.evaluate(expr.value);
 
-    const distance = this.locals.get(expr);
+    const distance = this.locals.get(JSON.stringify(expr));
     if (distance !== null) {
       this.environment.assignAt(distance, expr.name, value);
     } else {
