@@ -111,7 +111,7 @@ class Interpreter {
   lookUpVariable(name, expr) {
     const distance = this.locals.get(JSON.stringify(expr));
     if (distance !== null) {
-      return this.environment.getAt(distance, name.lexeme);
+      return this.environment.getAt(distance, name);
     } else {
       return this.globals.get(name);
     }

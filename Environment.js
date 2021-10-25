@@ -31,10 +31,7 @@ class Environment {
     if (distance > 1) {
       return this.ancestor(distance).values.get(name);
     } else {
-      const currentName = {
-        lexeme: name,
-      };
-      return self.get(currentName);
+      return self.get(name);
     }
   }
 
