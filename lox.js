@@ -51,8 +51,6 @@ function runRepl(source) {
   const parser = new Parser(tokens);
 
   if (hadError) return;
-  const resolver = new Resolver(interpreter);
-  resolver.resolve(statements);
 
   const declaration = parser.declaration();
   interpreter.repl(declaration);
