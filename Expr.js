@@ -46,6 +46,20 @@ class Call extends Expr {
 }
 exports.Call = Call;
 
+class Get extends Expr {
+  constructor(object, name) {
+    super(object, name);
+    this.object = object;
+    this.name = name;
+  }
+
+  accept(visitor) {
+    return visitor.visitGetExpr(this);
+  }
+
+}
+exports.Get = Get;
+
 class Grouping extends Expr {
   constructor(expression) {
     super(expression);
@@ -86,6 +100,21 @@ class Logical extends Expr {
 
 }
 exports.Logical = Logical;
+
+class Set extends Expr {
+  constructor(object, name, value) {
+    super(object, name, value);
+    this.object = object;
+    this.name = name;
+    this.value = value;
+  }
+
+  accept(visitor) {
+    return visitor.visitSetExpr(this);
+  }
+
+}
+exports.Set = Set;
 
 class Unary extends Expr {
   constructor(operator, right) {

@@ -8,6 +8,8 @@ const {
   Assign,
   Logical,
   Call,
+  Get,
+  Set,
 } = require('./Expr');
 const {
   Print,
@@ -263,6 +265,9 @@ class Parser {
       if (expr.constructor.toString().indexOf('Variable') > -1) {
         const name = expr.name;
         return new Assign(name, value);
+      } else if (expr.constructor.toString().indexOf('Get') > -1) {
+        const get = expr;
+        return new Set(get.object, get.name, value);
       }
 
       this.error(equals, 'Invalid assignment target.');
@@ -376,6 +381,10 @@ class Parser {
     while (true) {
       if (this.match(LEFT_PAREN)) {
         expr = this.finishCall(expr);
+      } else if (this.match(DOT)) {
+        const name = this.consume(IDENTIFIER,
+          'Expect property name after \'.\'.');
+        expr = new Get(expr, name);
       } else {
         break;
       }

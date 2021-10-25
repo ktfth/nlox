@@ -64,6 +64,8 @@ class Interpreter {
     this.resolve = this.resolve.bind(this);
     this.lookUpVariable = this.lookUpVariable.bind(this);
     this.visitClassStmt = this.visitClassStmt.bind(this);
+    this.visitGetExpr = this.visitGetExpr.bind(this);
+    this.visitSetExpr = this.visitSetExpr.bind(this);
   }
 
   interpret(statements) {
@@ -90,6 +92,19 @@ class Interpreter {
     }
 
     return this.evaluate(expr.right);
+  }
+
+  visitSetExpr(expr) {
+    const object = this.evaluate(expr.object);
+
+    if (object.constructor.toString().indexOf('LoxInstance') === -1) {
+      throw new RuntimeError(expr.name,
+        'Only instances have fields.');
+    }
+
+    const value = this.evaluate(expr.value);
+    object.set(expr.name, value);
+    return value;
   }
 
   visitUnaryExpr(expr) {
@@ -212,7 +227,14 @@ class Interpreter {
 
   visitClassStmt(stmt) {
     this.environment.define(stmt.name.lexeme, null);
-    const klass = new LoxClass(stmt.name.lexeme);
+
+    const methods = new Map();
+    for (let method of stmt.methods) {
+      const fn = new LoxFunction(method, this.environment);
+      methods.set(method.name.lexeme, fn);
+    }
+
+    const klass = new LoxClass(stmt.name.lexeme, methods);
     this.environment.assign(stmt.name, klass);
     return null;
   }
@@ -358,6 +380,16 @@ class Interpreter {
         args.length + '.');
     }
     return fn.call(this, args);
+  }
+
+  visitGetExpr(expr) {
+    const object = this.evaluate(expr.object);
+    if (object.constructor.toString().indexOf('LoxInstance') > -1) {
+      return object.get(expr.name);
+    }
+
+    throw new RuntimeError(expr.name,
+      'Only instances have properties.');
   }
 }
 module.exports = Interpreter;

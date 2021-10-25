@@ -3,6 +3,7 @@ const Lox = require('./lox');
 const FunctionType = {
   NONE: 0,
   FUNCTION: 1,
+  METHOD: 2,
 };
 
 class Resolver {
@@ -38,6 +39,8 @@ class Resolver {
     this.visitLogicalExpr = this.visitLogicalExpr.bind(this);
     this.visitUnaryExpr = this.visitUnaryExpr.bind(this);
     this.visitClassStmt = this.visitClassStmt.bind(this);
+    this.visitGetExpr = this.visitGetExpr.bind(this);
+    this.visitSetExpr = this.visitSetExpr.bind(this);
   }
 
   visitBlockStmt(stmt) {
@@ -50,6 +53,12 @@ class Resolver {
   visitClassStmt(stmt) {
     this.declare(stmt.name);
     this.define(stmt.name);
+
+    for (let method of stmt.methods) {
+      const declaration = FunctionType.METHOD;
+      this.resolveFn(method, declaration);
+    }
+
     return null;
   }
 
@@ -126,6 +135,11 @@ class Resolver {
     return null;
   }
 
+  visitGetExpr(expr) {
+    this.resolve(expr.object);
+    return null;
+  }
+
   visitGroupingExpr(expr) {
     this.resolveExpr(expr.expression);
     return null;
@@ -138,6 +152,12 @@ class Resolver {
   visitLogicalExpr(expr) {
     this.resolveExpr(expr.left);
     this.resolveExpr(expr.right);
+    return null;
+  }
+
+  visitSetExpr(expr) {
+    this.resolve(expr.value);
+    this.resolve(expr.object);
     return null;
   }
 
