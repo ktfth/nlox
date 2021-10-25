@@ -203,7 +203,7 @@ class Resolver {
   }
 
   resolveLocal(expr, name) {
-    for (let i = this.scopes.length - 1; i >= 0; i--) {
+    for (let i = this.scopes.length - 1; i >= 0; i -= 1) {
       if (this.scopes[i].has(name.lexeme)) {
         this.interpreter.resolve(expr, this.scopes.length - 1 - i);
         return;

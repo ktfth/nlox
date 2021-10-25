@@ -27,12 +27,7 @@ class Environment {
   }
 
   getAt(distance, name) {
-    const self = this;
-    if (distance > 1) {
-      return this.ancestor(distance).values.get(name);
-    } else {
-      return self.get(name);
-    }
+    return this.ancestor(distance).values.get(name);
   }
 
   assignAt(distance, name, value) {

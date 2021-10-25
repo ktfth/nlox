@@ -105,12 +105,13 @@ class Interpreter {
   }
 
   visitVariableExpr(expr) {
-    return this.lookUpVariable(expr.name, expr);
+    // return this.lookUpVariable(expr.name, expr);
+    return this.environment.get(expr.name);
   }
 
   lookUpVariable(name, expr) {
-    const distance = this.locals.get(JSON.stringify(expr));
-    if (distance !== null) {
+    const distance = this.locals.get(expr);
+    if (distance !== undefined) {
       return this.environment.getAt(distance, name);
     } else {
       return this.globals.get(name);
@@ -172,7 +173,7 @@ class Interpreter {
   }
 
   resolve(expr, depth) {
-    this.locals.set(JSON.stringify(expr), depth);
+    this.locals.set(expr, depth);
   }
 
   repl(stmt) {
@@ -260,12 +261,13 @@ class Interpreter {
   visitAssignExpr(expr) {
     const value = this.evaluate(expr.value);
 
-    const distance = this.locals.get(JSON.stringify(expr));
-    if (distance !== null) {
-      this.environment.assignAt(distance, expr.name, value);
-    } else {
-      this.globals.assign(expr.name, value);
-    }
+    // const distance = this.locals.get(expr);
+    // if (distance !== null || distance !== undefined) {
+    //   this.environment.assignAt(distance, expr.name, value);
+    // } else {
+    //   this.globals.assign(expr.name, value);
+    // }
+    this.environment.assign(expr.name, value);
 
     return value;
   }
