@@ -67,6 +67,7 @@ class Interpreter {
     this.visitGetExpr = this.visitGetExpr.bind(this);
     this.visitSetExpr = this.visitSetExpr.bind(this);
     this.visitThisExpr = this.visitThisExpr.bind(this);
+    this.visitSuperExpr = this.visitSuperExpr.bind(this);
   }
 
   interpret(statements) {
@@ -108,6 +109,24 @@ class Interpreter {
     return value;
   }
 
+  visitSuperExpr(expr) {
+    const distance = this.locals.get(expr);
+    const superclass = this.environment.getAt(
+      distance, 'super');
+
+    const object = this.environment.getAt(
+      distance - 1, 'this');
+
+    const method = superclass.findMethod(expr.method.lexeme);
+
+    if (method === null) {
+      throw new RuntimeError(expr.method,
+        `Undefined property \'${expr.method.lexeme}\'.`);
+    }
+
+    return method.bind(object);
+  }
+
   visitThisExpr(expr) {
     return this.environment.get(expr.keyword);
   }
@@ -133,7 +152,7 @@ class Interpreter {
 
   lookUpVariable(name, expr) {
     const distance = this.locals.get(expr);
-    if (distance !== undefined) {
+    if (distance !== null) {
       return this.environment.getAt(distance, name);
     } else {
       return this.globals.get(name);
@@ -231,16 +250,38 @@ class Interpreter {
   }
 
   visitClassStmt(stmt) {
-    this.environment.define(stmt.name.lexeme, null);
-
-    const methods = new Map();
-    for (let method of stmt.methods) {
-      const fn = new LoxFunction(method, this.environment,
-        method.name.lexeme === 'init');
-      methods.set(method.name.lexeme, fn);
+    let superclass = null;
+    if (stmt.superclass !== null) {
+      superclass = this.evaluate(stmt.superclass);
+      if (superclass.constructor.toString().indexOf('LoxClass') === -1) {
+        throw new RuntimeError(stmt.superclass.name,
+          'Superclass must be a class.');
+      }
     }
 
-    const klass = new LoxClass(stmt.name.lexeme, methods);
+    this.environment.define(stmt.name.lexeme, null);
+
+    if (stmt.superclass !== null) {
+      this.environment = new Environment(this.environment);
+      this.environment.define('super', superclass);
+    }
+
+    const methods = new Map();
+    if (stmt.methods !== undefined) {
+      for (let method of stmt.methods) {
+        const fn = new LoxFunction(method, this.environment,
+          method.name.lexeme === 'init');
+          methods.set(method.name.lexeme, fn);
+        }
+    }
+
+    const klass = new LoxClass(stmt.name.lexeme,
+      superclass, methods);
+
+    if (superclass !== null) {
+      this.environment = this.environment.enclosing;
+    }
+
     this.environment.assign(stmt.name, klass);
     return null;
   }
@@ -299,11 +340,12 @@ class Interpreter {
     const value = this.evaluate(expr.value);
 
     // const distance = this.locals.get(expr);
-    // if (distance !== null || distance !== undefined) {
+    // if (distance !== null) {
     //   this.environment.assignAt(distance, expr.name, value);
     // } else {
     //   this.globals.assign(expr.name, value);
     // }
+
     this.environment.assign(expr.name, value);
 
     return value;

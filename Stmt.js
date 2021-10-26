@@ -16,9 +16,10 @@ class Block extends Stmt {
 exports.Block = Block;
 
 class Class extends Stmt {
-  constructor(name, methods) {
-    super(name, methods);
+  constructor(name, superclass, methods) {
+    super(name, superclass, methods);
     this.name = name;
+    this.superclass = superclass;
     this.methods = methods;
   }
 

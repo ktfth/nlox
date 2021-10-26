@@ -11,6 +11,7 @@ const {
   Get,
   Set,
   This,
+  Super,
 } = require('./Expr');
 const {
   Print,
@@ -101,6 +102,13 @@ class Parser {
 
   classDeclaration() {
     const name = this.consume(IDENTIFIER, 'Expect class name.');
+
+    let superclass = null;
+    if (this.match(LESS)) {
+      this.consume(IDENTIFIER, 'Expect superclass name.');
+      superclass = new Variable(this.previous());
+    }
+
     this.consume(LEFT_BRACE, 'Expect \'{\' before class body.');
 
     const methods = [];
@@ -110,7 +118,7 @@ class Parser {
 
     this.consume(RIGHT_BRACE, 'Expect \'}\' after class body.');
 
-    return new Class(name, methods);
+    return new Class(name, superclass, methods);
   }
 
   statement() {
@@ -403,6 +411,14 @@ class Parser {
     if (this.match(NUMBER, STRING)) {
       return new Literal(
         this.previous().literal === null ? 0 : this.previous().literal);
+    }
+
+    if (this.match(SUPER)) {
+      const keyword = this.previous();
+      this.consume(DOT, 'Expect \'.\' after \'super\'.');
+      const method = this.consume(IDENTIFIER,
+        'Expect superclass method name.');
+      return new Super(keyword, method);
     }
 
     if (this.match(THIS)) return new This(this.previous());

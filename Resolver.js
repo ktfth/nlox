@@ -49,6 +49,7 @@ class Resolver {
     this.visitGetExpr = this.visitGetExpr.bind(this);
     this.visitSetExpr = this.visitSetExpr.bind(this);
     this.visitThisExpr = this.visitThisExpr.bind(this);
+    this.visitSuperExpr = this.visitSuperExpr.bind(this);
   }
 
   visitBlockStmt(stmt) {
@@ -65,19 +66,35 @@ class Resolver {
     this.declare(stmt.name);
     this.define(stmt.name);
 
+    if (stmt.superclass !== null &&
+        stmt.name.lexeme === stmt.superclass.name.lexeme) {
+      Lox.error(stmt.superclass.name,
+        'A class can\'t inherit from itself.');
+    }
+
+    if (stmt.superclass !== null) {
+      this.beginScope();
+      this.scopes[this.scopes.length - 1].set('super', true);
+    }
+
     this.beginScope();
     this.scopes[this.scopes.length - 1].set('this', true);
 
-    for (let method of stmt.methods) {
-      let declaration = FunctionType.METHOD;
-      if (method.name.lexeme === 'init') {
-        declaration = FunctionType.INITIALIZER;
-      }
+    if (stmt.methods !== undefined) {
+      for (let method of stmt.methods) {
+        let declaration = FunctionType.METHOD;
+        if (method.name.lexeme === 'init') {
+          declaration = FunctionType.INITIALIZER;
+        }
 
-      this.resolveFn(method, declaration);
+        this.resolveFn(method, declaration);
+      }
     }
 
     this.endScope();
+
+    if (stmt.superclass !== null) this.endScope();
+
     this.currentClass = enclosingClass;
 
     return null;
@@ -183,6 +200,11 @@ class Resolver {
   visitSetExpr(expr) {
     this.resolve(expr.value);
     this.resolve(expr.object);
+    return null;
+  }
+
+  visitSuperExpr(expr) {
+    this.resolveLocal(expr, expr.keyword);
     return null;
   }
 

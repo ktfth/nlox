@@ -1,8 +1,9 @@
 const LoxInstance = require('./LoxInstance');
 
 class LoxClass {
-  constructor(name, methods) {
+  constructor(name, superclass, methods) {
     this.name = name;
+    this.superclass = superclass;
     this.methods = methods;
 
     this.toString = this.toString.bind(this);
@@ -14,6 +15,10 @@ class LoxClass {
   findMethod(name) {
     if (this.methods.has(name)) {
       return this.methods.get(name);
+    }
+
+    if (this.superclass !== null) {
+      return this.superclass.findMethod(name);
     }
 
     return null;

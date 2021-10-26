@@ -116,6 +116,20 @@ class Set extends Expr {
 }
 exports.Set = Set;
 
+class Super extends Expr {
+  constructor(keyword, method) {
+    super(keyword, method);
+    this.keyword = keyword;
+    this.method = method;
+  }
+
+  accept(visitor) {
+    return visitor.visitSuperExpr(this);
+  }
+
+}
+exports.Super = Super;
+
 class This extends Expr {
   constructor(keyword) {
     super(keyword);
