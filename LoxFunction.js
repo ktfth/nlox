@@ -1,9 +1,11 @@
 const Environment = require('./Environment');
 
 class LoxFunction {
-  constructor(declaration, closure) {
+  constructor(declaration, closure, isInitializer) {
     this.declaration = declaration;
     this.closure = closure;
+    this.isInitializer = isInitializer;
+
 
     this.call = this.call.bind(this);
     this.arity = this.arity.bind(this);
@@ -13,7 +15,8 @@ class LoxFunction {
   bind(instance) {
     const environment = new Environment(this.closure);
     environment.define('this', instance);
-    return new LoxFunction(this.declaration, environment);
+    return new LoxFunction(this.declaration, environment,
+                           this.isInitializer);
   }
 
   call(interpreter, args) {
@@ -26,8 +29,11 @@ class LoxFunction {
     try {
       interpreter.executeBlock(this.declaration.body, environment);
     } catch (returnValue) {
+      if (this.isInitializer) return this.closure.getAt(0, 'this');
       return returnValue.value;
     }
+
+    if (this.isInitializer) return this.closure.getAt(0, 'this');
     return null;
   }
 

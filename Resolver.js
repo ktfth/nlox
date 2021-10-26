@@ -3,7 +3,13 @@ const Lox = require('./lox');
 const FunctionType = {
   NONE: 0,
   FUNCTION: 1,
-  METHOD: 2,
+  INITIALIZER: 2,
+  METHOD: 3,
+};
+
+const ClassType = {
+  NONE: 0,
+  CLASS: 1,
 };
 
 class Resolver {
@@ -12,6 +18,7 @@ class Resolver {
 
     this.scopes = [];
     this.currentFunction = FunctionType.NONE;
+    this.currentClass = ClassType.NONE;
 
     this.visitBlockStmt = this.visitBlockStmt.bind(this);
     this.resolve = this.resolve.bind(this);
@@ -52,6 +59,9 @@ class Resolver {
   }
 
   visitClassStmt(stmt) {
+    const enclosingClass = this.currentClass;
+    this.currentClass = ClassType.CLASS;
+
     this.declare(stmt.name);
     this.define(stmt.name);
 
@@ -59,11 +69,16 @@ class Resolver {
     this.scopes[this.scopes.length - 1].set('this', true);
 
     for (let method of stmt.methods) {
-      const declaration = FunctionType.METHOD;
+      let declaration = FunctionType.METHOD;
+      if (method.name.lexeme === 'init') {
+        declaration = FunctionType.INITIALIZER;
+      }
+
       this.resolveFn(method, declaration);
     }
 
     this.endScope();
+    this.currentClass = enclosingClass;
 
     return null;
   }
@@ -98,6 +113,10 @@ class Resolver {
 
   visitReturnStmt(stmt) {
     if (stmt.value !== null) {
+      if (this.currentFunction === FunctionType.INITIALIZER) {
+        Lox.error(stmt.keyword,
+          'Can\'t return a value from an initializer.');
+      }
       this.resolve(stmt.value);
     }
 
@@ -168,6 +187,11 @@ class Resolver {
   }
 
   visitThisExpr(expr) {
+    if (this.currentClass === ClassType.NONE) {
+      Lox.error(expr.keyword,
+        'Can\'t use \'this\' outside of a class.');
+    }
+
     this.resolveLocal(expr, expr.keyword);
     return null;
   }

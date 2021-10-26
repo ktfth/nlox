@@ -235,7 +235,8 @@ class Interpreter {
 
     const methods = new Map();
     for (let method of stmt.methods) {
-      const fn = new LoxFunction(method, this.environment);
+      const fn = new LoxFunction(method, this.environment,
+        method.name.lexeme === 'init');
       methods.set(method.name.lexeme, fn);
     }
 
@@ -250,7 +251,7 @@ class Interpreter {
   }
 
   visitFnStmt(stmt) {
-    const fn = new LoxFunction(stmt, this.environment);
+    const fn = new LoxFunction(stmt, this.environment, false);
     this.environment.define(stmt.name.lexeme, fn);
     return null;
   }
