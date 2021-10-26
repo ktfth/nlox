@@ -116,6 +116,19 @@ class Set extends Expr {
 }
 exports.Set = Set;
 
+class This extends Expr {
+  constructor(keyword) {
+    super(keyword);
+    this.keyword = keyword;
+  }
+
+  accept(visitor) {
+    return visitor.visitThisExpr(this);
+  }
+
+}
+exports.This = This;
+
 class Unary extends Expr {
   constructor(operator, right) {
     super(operator, right);

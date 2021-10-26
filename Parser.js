@@ -10,6 +10,7 @@ const {
   Call,
   Get,
   Set,
+  This,
 } = require('./Expr');
 const {
   Print,
@@ -92,6 +93,7 @@ class Parser {
 
       return this.statement();
     } catch (error) {
+      console.log(error);
       this.synchronize();
       return null;
     }
@@ -402,6 +404,8 @@ class Parser {
       return new Literal(
         this.previous().literal === null ? 0 : this.previous().literal);
     }
+
+    if (this.match(THIS)) return new This(this.previous());
 
     if (this.match(IDENTIFIER)) {
       return new Variable(this.previous());

@@ -41,6 +41,7 @@ class Resolver {
     this.visitClassStmt = this.visitClassStmt.bind(this);
     this.visitGetExpr = this.visitGetExpr.bind(this);
     this.visitSetExpr = this.visitSetExpr.bind(this);
+    this.visitThisExpr = this.visitThisExpr.bind(this);
   }
 
   visitBlockStmt(stmt) {
@@ -54,10 +55,15 @@ class Resolver {
     this.declare(stmt.name);
     this.define(stmt.name);
 
+    this.beginScope();
+    this.scopes[this.scopes.length - 1].set('this', true);
+
     for (let method of stmt.methods) {
       const declaration = FunctionType.METHOD;
       this.resolveFn(method, declaration);
     }
+
+    this.endScope();
 
     return null;
   }
@@ -101,7 +107,7 @@ class Resolver {
   visitVarStmt(stmt) {
     this.declare(stmt.name);
     if (stmt.initializer !== null) {
-      this.resolveStmt(stmt.initializer);
+      this.resolveExpr(stmt.initializer);
     }
     this.define(stmt.name);
     return null;
@@ -161,6 +167,11 @@ class Resolver {
     return null;
   }
 
+  visitThisExpr(expr) {
+    this.resolveLocal(expr, expr.keyword);
+    return null;
+  }
+
   visitUnaryExpr(expr) {
     this.resolveExpr(expr.right);
     return null;
@@ -168,7 +179,7 @@ class Resolver {
 
   visitVariableExpr(expr) {
     if (this.scopes.length > 0 &&
-        this.scopes[0].get(expr.name.lexeme) === false) {
+        this.scopes[this.scopes.length - 1].get(expr.name.lexeme) === false) {
       Lox.error(expr.name,
         'Can\'t read local variable in its own initializer.');
     }
@@ -216,7 +227,7 @@ class Resolver {
   declare(name) {
     if (this.scopes.length === 0) return;
 
-    const scope = this.scopes[0];
+    const scope = this.scopes[this.scopes.length - 1];
     if (scope.has(name.lexeme)) {
       Lox.error(name,
         'Already a variable with this name in this scope.');
@@ -226,7 +237,7 @@ class Resolver {
 
   define(name) {
     if (this.scopes.length === 0) return;
-    this.scopes[0].set(name.lexeme, true);
+    this.scopes[this.scopes.length - 1].set(name.lexeme, true);
   }
 
   resolveLocal(expr, name) {

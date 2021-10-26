@@ -66,6 +66,7 @@ class Interpreter {
     this.visitClassStmt = this.visitClassStmt.bind(this);
     this.visitGetExpr = this.visitGetExpr.bind(this);
     this.visitSetExpr = this.visitSetExpr.bind(this);
+    this.visitThisExpr = this.visitThisExpr.bind(this);
   }
 
   interpret(statements) {
@@ -105,6 +106,10 @@ class Interpreter {
     const value = this.evaluate(expr.value);
     object.set(expr.name, value);
     return value;
+  }
+
+  visitThisExpr(expr) {
+    return this.environment.get(expr.keyword);
   }
 
   visitUnaryExpr(expr) {

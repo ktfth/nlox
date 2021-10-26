@@ -17,11 +17,11 @@ class LoxInstance {
 
   get(name) {
     if (this.fields.has(name.lexeme)) {
-      return fields.get(name.lexeme);
+      return this.fields.get(name.lexeme);
     }
 
     const method = this.klass.findMethod(name.lexeme);
-    if (method !== null) return method;
+    if (method !== null) return method.bind(this);
 
     throw new RuntimeError(name,
       `Undefined property \'${name.lexeme}\'.`);
