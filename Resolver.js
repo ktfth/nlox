@@ -10,6 +10,7 @@ const FunctionType = {
 const ClassType = {
   NONE: 0,
   CLASS: 1,
+  SUBCLASS: 2,
 };
 
 class Resolver {
@@ -73,6 +74,7 @@ class Resolver {
     }
 
     if (stmt.superclass !== null) {
+      this.currentClass = ClassType.SUBCLASS;
       this.beginScope();
       this.scopes[this.scopes.length - 1].set('super', true);
     }
@@ -204,6 +206,15 @@ class Resolver {
   }
 
   visitSuperExpr(expr) {
+    if (this.currentClass === ClassType.NONE) {
+      Lox.error(expr.keyword,
+        'Can\'t use \'super\' outside of a class.');
+    } else if (this.currentClass !== ClassType.SUBCLASS) {
+      Lox.error(expr.keyword,
+        'Can\'t use \'super\' in a class with no superclass.');
+    }
+
+
     this.resolveLocal(expr, expr.keyword);
     return null;
   }
