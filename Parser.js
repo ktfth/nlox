@@ -349,7 +349,7 @@ class Parser {
   factor() {
     let expr = this.unary();
 
-    while (this.match(SLASH, STAR)) {
+    while (this.match(SLASH, STAR, MODULO)) {
       const operator = this.previous();
       const right = this.unary();
       expr = new Binary(expr, operator, right);

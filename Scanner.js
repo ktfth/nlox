@@ -36,6 +36,7 @@ const {
   TRUE,
   VAR,
   WHILE,
+  MODULO,
 } = require('./TokenType');
 const Token = require('./Token');
 const Lox = require('./lox');
@@ -112,6 +113,7 @@ class Scanner {
       case '+'.charCodeAt(0): this.addToken(PLUS); break;
       case ';'.charCodeAt(0): this.addToken(SEMICOLON); break;
       case '*'.charCodeAt(0): this.addToken(STAR); break;
+      case '%'.charCodeAt(0): this.addToken(MODULO); break;
       case '!'.charCodeAt(0):
         this.addToken(this.match('='.charCodeAt(0)) ? BANG_EQUAL : BANG);
         break;

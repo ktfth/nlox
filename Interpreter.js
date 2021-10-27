@@ -394,6 +394,9 @@ class Interpreter {
       case STAR:
         this.checkNumberOperands(expr.operator, left, right);
         return left * right;
+      case MODULO:
+        this.checkNumberOperands(expr.operator, left, right);
+        return left % right;
     }
 
     return null;

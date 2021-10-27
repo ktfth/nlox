@@ -45,6 +45,8 @@ const TokenType = {
   VAR: 36,
   WHILE: 37,
 
-  EOF: 38
+  EOF: 38,
+
+  MODULO: 39,
 };
 module.exports = TokenType;
