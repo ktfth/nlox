@@ -386,8 +386,18 @@ class Interpreter {
           return left + right;
         }
 
+        if (left !== undefined && left !== null && left.constructor.toString().indexOf('String') > -1 &&
+            right !== undefined && right !== null && right.constructor.toString().indexOf('Number') > -1) {
+          return left + right;
+        }
+
+        if (left !== undefined && left !== null && left.constructor.toString().indexOf('Number') > -1 &&
+            right !== undefined && right !== null && right.constructor.toString().indexOf('String') > -1) {
+          return left + right;
+        }
+
         throw new RuntimeError(expr.operator,
-          'Operands must be two numbers or two strings.');
+          'Operands must be number or string.');
       case SLASH:
         this.checkNumberOperands(expr.operator, left, right);
         return left / right;
