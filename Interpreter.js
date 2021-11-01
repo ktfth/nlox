@@ -28,6 +28,23 @@ class Clock extends LoxCallable {
   }
 }
 
+class Reverse extends LoxCallable {
+  constructor(callee) {
+    super(callee);
+
+    this.arity = this.arity.bind(this);
+    this.call = this.call.bind(this);
+  }
+
+  arity() {
+    return 1;
+  }
+
+  call(interpreter, args) {
+    return args[0].split('').reverse().join('');
+  }
+}
+
 class Interpreter {
   constructor() {
     this.globals = new Environment();
@@ -35,6 +52,7 @@ class Interpreter {
     this.locals = new Map();
 
     this.globals.define('clock', new Clock());
+    this.globals.define('reverse', new Reverse());
 
     this.visitLiteralExpr = this.visitLiteralExpr.bind(this);
     this.visitGroupingExpr = this.visitGroupingExpr.bind(this);
